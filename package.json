@@ -1,0 +1,12 @@
+{
+  "name": "apex",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev": "npm run dev -w @apex/web",
+    "build": "npm run build -w @apex/web",
+    "start": "npm run start -w @apex/web",
+    "typecheck": "npm run typecheck -w @apex/web"
+  }
+}
