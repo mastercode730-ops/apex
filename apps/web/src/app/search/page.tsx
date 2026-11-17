@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { teams, players, series, articles } from '@apex/core';
-import { getAllMatches } from '@/lib/data';
+import { teams, players, series } from '@apex/core';
+import { getAllMatches, getArticles, ensureRegistry } from '@/lib/data';
 import { Breadcrumbs, PageTitle } from '@/components/ui';
 import { pageMeta } from '@/lib/site';
 
@@ -8,7 +8,9 @@ export const metadata = pageMeta({ title: 'Search Cricket Teams, Players, Series
 
 export default async function Search({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const q = ((await searchParams).q ?? '').trim().toLowerCase();
+  await ensureRegistry();
   const allM = await getAllMatches();
+  const articles = await getArticles();
   const hit = (s: string) => q && s.toLowerCase().includes(q);
   const groups = [
     ['Teams', teams.filter((t) => hit(t.name) || hit(t.code)).map((t) => [t.name, `/team/${t.id}`])],

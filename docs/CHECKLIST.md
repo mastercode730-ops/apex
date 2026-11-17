@@ -80,17 +80,39 @@ Legend: PASS / PARTIAL / FAIL / EXT (needs external verification) / N/A
 5. Women's rankings, points tables, commentary filters, player career stats.
 6. Start the Expo mobile app on `@apex/core`.
 
-## 6. Backend foundation (added)
-- `db/schema.sql`: vendor-neutral Postgres schema (teams, players, series, matches, innings, deliveries, scorecard lines, rankings, stat leaders, articles, contact messages). Every row has `source`/`source_id` so vendors can be swapped. **Not applied to any database yet.**
-- `packages/core/src/vendor.ts`: `VendorAdapter` contract (live, fixtures, match) and env-based provider selection (`APEX_DATA_PROVIDER=demo|database`).
-- `/api/matches/[id]/stream`: Server-Sent Events. The match page refreshes only when the score changes, falling back to polling.
-- Still needed once a vendor is chosen: the adapter, an ingestion worker (separate Node service), database + Redis provisioning, and a `database` provider that reads Postgres.
+## 6. Backend (built)
+- **Postgres** (`packages/db`): versioned migrations, repositories for matches (list view + full detail), teams, players, series, rankings, careers, articles, contact messages, worker state.
+- **Worker** (`services/worker`): the only process that calls Sportmonks. Syncs fixtures (2 min), live match detail (10-20 s), finished-match scorecards, team rankings (daily), player careers (batched). Rate-limit aware, idempotent, backs off on errors, health endpoint, graceful shutdown.
+- **Web in `database` mode** reads only from Postgres (3 s in-process cache), so visitor traffic never reaches Sportmonks.
+- **Public API v1** for the mobile app (CORS, per-IP rate limit, cache headers, lookup tables so clients need one request per screen).
+- **Real data now:** fixtures, live scores, scorecards, ball-by-ball commentary, series and points tables (real NRR), team rankings (men + women), stat leaders computed from stored scorecards, player careers from the feed.
+- **Not available from Sportmonks:** individual player rankings (batter/bowler/all-rounder). The site shows team rankings only in `database` mode and says so. Needs another source.
+- **News** is authored in `/admin` (token protected). Production shows no demo news.
+- **Redis was deliberately not added.** One VPS + Postgres + a short in-process cache is enough; add Redis only when running several web instances.
 
-## 7. Sportmonks adapter (added)
-- `apps/web/src/lib/sportmonks.ts` maps Sportmonks Cricket API v2.0 fixtures to Apex types: scorecards (batting, bowling, fall of wickets, extras), ball-by-ball commentary, recent overs, toss, venue, lineups. Teams, players and series are discovered from the feed.
-- `apps/web/src/lib/data.ts` is the async facade; `APEX_DATA_PROVIDER=demo|sportmonks` selects the source. Demo remains the default.
-- In-process cache with TTLs (list 60 s, live match 30 s, finished 1 h) keeps usage inside the free plan's 180 calls/hour. This cache is per server process; with several instances use Redis.
-- Points tables use real results and real net run rate.
-- **Verified against real data:** 15 fixtures, 75 match-page URLs (all tabs), series, team, player, OG image, 404. **Not verified:** a live in-play match (none was on during testing).
-- **Still demo data even in sportmonks mode:** rankings, stats leaders, player career stats, news. Win probability is not provided by the feed, so it is hidden for real matches.
-- **Free plan limits:** only 3 leagues (T20I, BBL, CSA T20 Challenge), no IPL or Tests. A paid plan or second vendor is needed for launch.
+## 7. Sportmonks adapter
+`packages/sportmonks` maps API v2.0 to Apex types, caches and de-duplicates calls, and tracks the rate-limit headers. 180/h on the free plan; paid plans are far higher. Free plan covers only 3 leagues.
+
+## 8. Mobile app (built)
+Expo SDK 58 + Expo Router: Live, Fixtures, Series (+detail), Rankings, News (+article), Match detail (Live / Scorecard / Commentary / Info, polls every 6 s while live). Animated cards, score pop, live pulse. `expo-doctor` 20/20, typecheck clean, Android and iOS JS bundles build.
+
+## 9. Verification status (honest)
+
+| Area | Verified how | Result |
+|---|---|---|
+| Unit/integration tests | `npm test` (core, db on real Postgres engine, Sportmonks mapping with mocked HTTP, deploy config) | 29 pass |
+| Typecheck | web, worker, mobile | clean |
+| Web build | `next build` incl. standalone output | passes; standalone server run and probed |
+| End to end | real Sportmonks data -> worker -> Postgres -> web in `database` mode -> every page, tab, API route, OG image | all 200, zero server errors |
+| Worker long-running mode | ran 75 s; health endpoint ok; web `/api/health` went green off the worker heartbeat | pass |
+| Mobile | Expo doctor, `expo export` for android + ios | pass |
+| **Not verified** | Docker images/compose never built (no Docker on the dev machine; config validated by tests only). A match actually **in play** (none was live during testing). Email delivery (Resend), Turnstile, GA4, Search Console, on-device mobile run, store submission, load testing, HTTPS/Caddy | need your accounts, a server, or a live match |
+
+## 10. Launch checklist (you)
+1. Buy the Sportmonks plan that covers your leagues; ask in writing about public commercial display rights.
+2. Domain + Hostinger VPS (Ubuntu 24.04), then follow `deploy/DEPLOY.md`.
+3. Fill `.env.production` (domain, Postgres password, Sportmonks token, admin token; optional Resend, Turnstile, GA, GSC).
+4. `docker compose --env-file .env.production up -d --build`, check `/api/health`.
+5. **Watch one real live match** on staging end to end before announcing.
+6. Publish first news in `/admin`; verify Search Console + submit sitemap; review privacy policy/terms with a lawyer.
+7. Mobile: Expo/EAS account, set bundle ids and `EXPO_PUBLIC_API_URL`, replace placeholder icons, `eas build`, `eas submit`; add a Apple Developer (USD 99/yr) and Google Play (USD 25) account.

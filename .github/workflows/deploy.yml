@@ -1,0 +1,23 @@
+name: Deploy to VPS
+
+# Manual by default (Actions tab > Deploy to VPS > Run workflow). To deploy on every push to main,
+# add:   push: { branches: [main] }   under `on:`  once you trust the pipeline.
+on:
+  workflow_dispatch:
+
+concurrency: deploy-production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script_stop: true
+          script: |
+            cd /opt/apex
+            ./deploy/update.sh

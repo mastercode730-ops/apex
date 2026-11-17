@@ -1,0 +1,22 @@
+{
+  "name": "@apex/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "once": "tsx src/index.ts --once",
+    "migrate": "tsx src/migrate.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@apex/core": "*",
+    "@apex/db": "*",
+    "@apex/sportmonks": "*",
+    "tsx": "^4.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^5.6.0"
+  }
+}

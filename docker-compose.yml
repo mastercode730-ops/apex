@@ -1,0 +1,91 @@
+# Production stack for a single VPS:  docker compose --env-file .env.production up -d --build
+# Services: postgres (data) -> migrate (one-shot) -> worker (Sportmonks sync) + web (site/API) -> caddy (HTTPS)
+name: apex
+
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    <<: *restart
+    environment:
+      POSTGRES_USER: apex
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env.production}
+      POSTGRES_DB: apex
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apex -d apex"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    # Not published to the internet. Only containers on this compose network can reach it.
+
+  migrate:
+    build: { context: ., dockerfile: services/worker/Dockerfile }
+    command: ["npx", "tsx", "services/worker/src/migrate.ts"]
+    environment:
+      DATABASE_URL: postgres://apex:${POSTGRES_PASSWORD}@postgres:5432/apex
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+
+  worker:
+    build: { context: ., dockerfile: services/worker/Dockerfile }
+    <<: *restart
+    environment:
+      DATABASE_URL: postgres://apex:${POSTGRES_PASSWORD}@postgres:5432/apex
+      SPORTMONKS_TOKEN: ${SPORTMONKS_TOKEN:?set SPORTMONKS_TOKEN in .env.production}
+      SYNC_FIXTURES_SECONDS: ${SYNC_FIXTURES_SECONDS:-120}
+      SYNC_LIVE_SECONDS: ${SYNC_LIVE_SECONDS:-10}
+      SYNC_BACKFILL_SECONDS: ${SYNC_BACKFILL_SECONDS:-60}
+      CAREER_BATCH: ${CAREER_BATCH:-10}
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:?set NEXT_PUBLIC_SITE_URL in .env.production}
+        NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:-}
+        NEXT_PUBLIC_TURNSTILE_SITEKEY: ${NEXT_PUBLIC_TURNSTILE_SITEKEY:-}
+        NEXT_PUBLIC_APP_STORE_URL: ${NEXT_PUBLIC_APP_STORE_URL:-}
+        NEXT_PUBLIC_PLAY_STORE_URL: ${NEXT_PUBLIC_PLAY_STORE_URL:-}
+    <<: *restart
+    environment:
+      APEX_DATA_PROVIDER: database
+      DATABASE_URL: postgres://apex:${POSTGRES_PASSWORD}@postgres:5432/apex
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+      GSC_VERIFICATION: ${GSC_VERIFICATION:-}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      CONTACT_TO_EMAIL: ${CONTACT_TO_EMAIL:-}
+      CONTACT_FROM_EMAIL: ${CONTACT_FROM_EMAIL:-}
+      TURNSTILE_SECRET: ${TURNSTILE_SECRET:-}
+      API_RATE_LIMIT_PER_MIN: ${API_RATE_LIMIT_PER_MIN:-120}
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  caddy:
+    image: caddy:2-alpine
+    <<: *restart
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?set SITE_DOMAIN in .env.production}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

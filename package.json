@@ -2,11 +2,25 @@
   "name": "apex",
   "private": true,
   "version": "0.1.0",
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/web",
+    "packages/*",
+    "services/*"
+  ],
   "scripts": {
     "dev": "npm run dev -w @apex/web",
     "build": "npm run build -w @apex/web",
     "start": "npm run start -w @apex/web",
-    "typecheck": "npm run typecheck -w @apex/web"
+    "typecheck": "npm run typecheck -w @apex/web && npm run typecheck -w @apex/worker",
+    "test": "vitest run",
+    "worker": "npm run start -w @apex/worker",
+    "db:dev": "node scripts/dev-db.mjs",
+    "db:migrate": "npm run migrate -w @apex/worker"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.16",
+    "@electric-sql/pglite-socket": "^0.2.19",
+    "vitest": "^5.1.0",
+    "yaml": "^2.9.1"
   }
 }

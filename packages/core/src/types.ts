@@ -38,3 +38,8 @@ export interface CricketProvider {
   listMatches(): MatchView[];
   getMatch(id: string): MatchView | undefined;
 }
+
+export type RankFormat = 'TEST' | 'ODI' | 'T20';
+export type RankKind = 'team' | 'batter' | 'bowler' | 'allrounder';
+/** Source of rankings, stat leaders, careers and articles (separate from match data). */
+export interface DataCapabilities { playerRankings: boolean; realStats: boolean; realCareers: boolean; realNews: boolean; }

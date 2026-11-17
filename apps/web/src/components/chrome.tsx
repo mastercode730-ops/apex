@@ -53,14 +53,20 @@ export async function Ticker() {
 export function Footer() {
   const cols = [
     { h: 'Explore', l: [['Live scores', '/cricket-live-score'], ['Fixtures', '/schedule'], ['Series', '/series'], ['Teams', '/team'], ['Stats', '/stats'], ['Rankings', '/rankings/men/team'], ['News', '/news']] },
-    { h: 'Company', l: [['Contact', '/contact'], ['Privacy Policy', '/privacy-policy'], ['Terms & Conditions', '/terms-and-conditions'], ['Sitemap', '/sitemap.xml']] },
+    { h: 'Company', l: [['Contact', '/contact'], ['Privacy Policy', '/privacy-policy'], ['Terms & Conditions', '/terms-and-conditions'], ['Community Guidelines', '/community-guidelines'], ['Editorial Policy', '/editorial-policy'], ['Sitemap', '/sitemap.xml']] },
   ];
   return (
     <footer className="mt-20 border-t border-line bg-surface/50">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-[2fr_1fr_1fr]">
         <div>
           <p className="font-display text-2xl font-extrabold">APEX</p>
-          <p className="mt-3 max-w-sm text-sm text-muted">{SITE.tagline}. Demo data is simulated and for demonstration only.</p>
+          <p className="mt-3 max-w-sm text-sm text-muted">{SITE.tagline}.</p>
+          {(process.env.NEXT_PUBLIC_APP_STORE_URL || process.env.NEXT_PUBLIC_PLAY_STORE_URL) && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {process.env.NEXT_PUBLIC_APP_STORE_URL && <a href={process.env.NEXT_PUBLIC_APP_STORE_URL} className="chip" rel="noopener">Download on the App Store</a>}
+              {process.env.NEXT_PUBLIC_PLAY_STORE_URL && <a href={process.env.NEXT_PUBLIC_PLAY_STORE_URL} className="chip" rel="noopener">Get it on Google Play</a>}
+            </div>
+          )}
         </div>
         {cols.map((c) => (
           <nav key={c.h} aria-label={c.h}>

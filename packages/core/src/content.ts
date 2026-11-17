@@ -1,12 +1,10 @@
-import type { Article, RankingEntry, StatRow } from './types';
+import type { Article, RankingEntry, StatRow, RankKind, RankFormat } from './types';
 import { players, slugify } from './players';
 import { teams } from './teams';
 import { hash, rng } from './rng';
 import { maxOvers } from './engine';
 import type { Format } from './types';
 
-export type RankKind = 'team' | 'batter' | 'bowler' | 'allrounder';
-export type RankFormat = 'TEST' | 'ODI' | 'T20';
 
 const womenPool: [string, string, string][] = [
   ['Smriti Mandhana', 'ind', 'bat'], ['Harmanpreet Kaur', 'ind', 'bat'], ['Jemimah Rodrigues', 'ind', 'bat'], ['Deepti Sharma', 'ind', 'all'], ['Renuka Singh', 'ind', 'bowl'],
@@ -34,11 +32,6 @@ export function rankings(kind: RankKind, format: RankFormat, gender: 'men' | 'wo
   return players.filter(want).map((p) => ({ p, v: 520 + Math.floor(r() * 380) })).sort((a, b) => b.v - a.v).slice(0, 15)
     .map((x, i) => ({ rank: i + 1, prev: Math.max(1, i + 1 + (Math.floor(r() * 3) - 1)), playerId: x.p.id, teamId: x.p.teamId, name: x.p.name, rating: x.v }));
 }
-
-export const statCategories = [
-  { id: 'most-runs', label: 'Most Runs' }, { id: 'most-wickets', label: 'Most Wickets' }, { id: 'highest-strike-rate', label: 'Highest Strike Rate' },
-  { id: 'most-hundreds', label: 'Most Hundreds' }, { id: 'most-sixes', label: 'Most Sixes' }, { id: 'most-fours', label: 'Most Fours' }, { id: 'most-fifties', label: 'Most Fifties' },
-] as const;
 
 export function stats(category: string, seriesId: string): StatRow[] {
   const r = rng(hash(`${category}-${seriesId}`));
@@ -103,16 +96,4 @@ export function pointsTable(teamIds: string[], completed: PtsMatch[]): PointsRow
   }
   return [...rows.values()].map((x) => ({ teamId: x.teamId, played: x.played, won: x.won, lost: x.lost, noResult: x.noResult, points: x.points,
     nrr: x.bf && x.ba ? +((x.rf / (x.bf / 6)) - (x.ra / (x.ba / 6))).toFixed(3) : 0 })).sort((a, b) => b.points - a.points || b.nrr - a.nrr);
-}
-
-export interface CareerRow { format: RankFormat; matches: number; runs: number; avg: number; sr: number; hundreds: number; wickets: number; econ: number; best: string; }
-export function careerStats(playerId: string): CareerRow[] {
-  return (['TEST', 'ODI', 'T20'] as const).map((format) => {
-    const r = rng(hash(`${playerId}-${format}`));
-    const matches = Math.floor((format === 'TEST' ? 40 : format === 'ODI' ? 90 : 70) * (0.5 + r()));
-    const runs = Math.floor(matches * (format === 'TEST' ? 45 : format === 'ODI' ? 38 : 24) * (0.5 + r()));
-    const wickets = Math.floor(matches * (0.2 + r() * 1.4));
-    return { format, matches, runs, avg: +(runs / Math.max(1, matches * 0.8)).toFixed(2), sr: +((format === 'TEST' ? 48 : format === 'ODI' ? 88 : 138) * (0.85 + r() * 0.3)).toFixed(1),
-      hundreds: Math.floor(runs / (format === 'TEST' ? 900 : 1500)), wickets, econ: +((format === 'TEST' ? 3.1 : format === 'ODI' ? 5.2 : 7.8) * (0.85 + r() * 0.3)).toFixed(2), best: `${1 + Math.floor(r() * 5)}/${10 + Math.floor(r() * 40)}` };
-  });
 }

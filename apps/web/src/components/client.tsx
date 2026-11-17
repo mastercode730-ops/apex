@@ -132,12 +132,18 @@ export function ContactForm() {
       setStatus('ok'); (e.target as HTMLFormElement).reset();
     } catch (err) { setStatus('error'); setMsg(err instanceof Error ? err.message : 'Something went wrong'); }
   }
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITEKEY;
+  useEffect(() => {
+    if (!siteKey || document.getElementById('cf-ts')) return;
+    const sc = document.createElement('script'); sc.id = 'cf-ts'; sc.async = true; sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'; document.head.appendChild(sc);
+  }, [siteKey]);
   const field = 'w-full rounded-xl border border-line bg-surface2 px-4 py-3 outline-none transition focus:border-accent';
   return (
     <form onSubmit={onSubmit} className="card grid max-w-xl gap-4 p-6" noValidate>
       <label className="grid gap-1.5 text-sm font-semibold">Name<input name="name" required minLength={2} maxLength={80} autoComplete="name" className={field} /></label>
       <label className="grid gap-1.5 text-sm font-semibold">Email<input name="email" type="email" required maxLength={120} autoComplete="email" className={field} /></label>
       <label className="grid gap-1.5 text-sm font-semibold">Message<textarea name="message" required minLength={10} maxLength={2000} rows={5} className={field} /></label>
+      {siteKey && <div className="cf-turnstile" data-sitekey={siteKey} />}
       <input name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" /> {/* honeypot */}
       <button disabled={status === 'sending'} className="rounded-xl bg-accent px-5 py-3 font-bold text-accentink transition hover:brightness-110 disabled:opacity-60">{status === 'sending' ? 'Sending…' : 'Send message'}</button>
       <p role="status" aria-live="polite" className={`text-sm ${status === 'ok' ? 'text-good' : 'text-live'}`}>

@@ -1,19 +1,21 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { articleBySlug, articles, categoryLabels } from '@apex/core';
+import { categoryLabels } from '@apex/core';
 import { Breadcrumbs, JsonLd } from '@/components/ui';
 import { pageMeta, fmtDate, SITE } from '@/lib/site';
+import { getArticle, getArticles } from '@/lib/data';
 
+export const dynamic = 'force-dynamic';
 type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props) {
-  const a = articleBySlug((await params).slug);
+  const a = await getArticle((await params).slug);
   if (!a) return { title: 'Article not found' };
   return pageMeta({ title: a.title, description: a.excerpt, path: `/news/${a.slug}`, type: 'article' });
 }
 
-export default async function Article({ params }: Props) {
-  const a = articleBySlug((await params).slug); if (!a) notFound();
-  const more = articles.filter((x) => x.id !== a.id && x.category === a.category).slice(0, 3);
+export default async function ArticlePage({ params }: Props) {
+  const a = await getArticle((await params).slug); if (!a) notFound();
+  const more = (await getArticles({ category: a.category })).filter((x) => x.id !== a.id).slice(0, 3);
   return (
     <article className="mx-auto max-w-3xl">
       <JsonLd data={{ '@context': 'https://schema.org', '@type': 'NewsArticle', headline: a.title, datePublished: a.publishedAt, author: { '@type': 'Person', name: a.author }, publisher: { '@type': 'Organization', name: SITE.name }, mainEntityOfPage: `${SITE.url}/news/${a.slug}`, description: a.excerpt }} />

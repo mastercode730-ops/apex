@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { articles, rankings, teams, categoryLabels } from '@apex/core';
-import { getAllMatches, getSeriesList } from '@/lib/data';
+import { teams, categoryLabels } from '@apex/core';
+import { getAllMatches, getSeriesList, getHomeRankings, getArticles } from '@/lib/data';
 import { MatchCard } from '@/components/MatchCard';
 import { Reveal, LiveRefresh } from '@/components/client';
 import { SectionHeader, TeamBadge } from '@/components/ui';
@@ -16,7 +16,9 @@ export default async function Home() {
   const byStart = (a: { startTime: string }, b: { startTime: string }) => +new Date(a.startTime) - +new Date(b.startTime);
   const upcoming = matches.filter((m) => m.status === 'upcoming').sort(byStart);
   const done = matches.filter((m) => m.status === 'completed').sort((a, b) => byStart(b, a));
-  const top = rankings('batter', 'T20').slice(0, 5);
+  const home = await getHomeRankings();
+  const top = home.rows.slice(0, 5);
+  const news = await getArticles({ limit: 3 });
   return (
     <div className="grid gap-14">
       <LiveRefresh every={6000} />
@@ -47,13 +49,13 @@ export default async function Home() {
         </section>
         <aside aria-label="Rankings and teams" className="grid content-start gap-10">
           <Reveal>
-            <SectionHeader title="Top T20I batters" href="/rankings/men/batter" />
+            <SectionHeader title={home.title} href={home.href} />
             <ol className="card divide-y divide-line">
               {top.map((r) => (
                 <li key={r.rank} className="flex items-center gap-3 px-4 py-3">
                   <span className="num w-5 font-display font-bold text-accent">{r.rank}</span>
                   <TeamBadge id={r.teamId} size={28} />
-                  <Link href={`/player/${r.playerId}`} className="flex-1 font-semibold hover:underline">{r.name}</Link>
+                  <Link href={r.playerId ? `/player/${r.playerId}` : `/team/${r.teamId}`} className="flex-1 font-semibold hover:underline">{r.name}</Link>
                   <span className="num font-bold">{r.rating}</span>
                 </li>
               ))}
@@ -79,10 +81,10 @@ export default async function Home() {
         </div>
       </section>
 
-      <section aria-labelledby="news-h">
+      {news.length > 0 && <section aria-labelledby="news-h">
         <SectionHeader id="news-h" title="Top headlines" href="/news" linkLabel="All news" />
         <div className="grid gap-4 md:grid-cols-3">
-          {articles.slice(0, 3).map((a, i) => (
+          {news.map((a, i) => (
             <Reveal key={a.id} delay={i * 0.08}>
               <Link href={`/news/${a.slug}`} className="card card-hover block h-full p-5">
                 <p className="text-xs font-bold uppercase tracking-wider text-accent">{categoryLabels[a.category]}</p>
@@ -93,7 +95,7 @@ export default async function Home() {
             </Reveal>
           ))}
         </div>
-      </section>
+      </section>}
     </div>
   );
 }

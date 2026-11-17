@@ -4,23 +4,30 @@
  * discovered in the feed, so the rest of the app stays vendor-neutral.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { teams, players, series, slugify, maxOvers, type MatchView, type InningsView, type Format, type Role, type BatLine, type BowlLine, type CommentaryItem, type Series } from '@apex/core';
+import { teams, players, series, slugify, maxOvers, emptyCareerLine, type MatchView, type InningsView, type Format, type Role, type BatLine, type BowlLine, type CommentaryItem, type Series, type Team, type Player, type RankingEntry, type RankFormat, type CareerLine } from '@apex/core';
 
 const BASE = 'https://cricket.sportmonks.com/api/v2.0/';
 export const sportmonksEnabled = () => process.env.APEX_DATA_PROVIDER === 'sportmonks' && !!process.env.SPORTMONKS_TOKEN;
 
 // Free plan allows 180 calls/hour: cache every call in-process and de-duplicate in-flight requests.
-const cache = new Map<string, { t: number; v: Promise<any> }>();
+const gl = globalThis as unknown as { __apexSmCache?: Map<string, { t: number; v: Promise<any> }> };
+const cache = (gl.__apexSmCache ??= new Map()); // shared across Next bundles
 export const TTL = { list: 60, live: 30, upcoming: 300, done: 3600, lookup: 86400 };
-export let apiCalls = 0;
+const stats = { calls: 0, remaining: undefined as number | undefined, limit: undefined as number | undefined, lastError: '' };
+export const getApiStats = () => ({ ...stats });
 
+export class SportmonksError extends Error { constructor(public status: number, msg: string) { super(msg); } }
+
+/** ttlSec = 0 bypasses the cache (used by the worker for live matches). */
 async function sm(path: string, ttlSec: number): Promise<any> {
   const hit = cache.get(path);
-  if (hit && Date.now() - hit.t < ttlSec * 1000) return hit.v;
-  apiCalls++;
-  const v = fetch(BASE + path, { headers: { Authorization: process.env.SPORTMONKS_TOKEN! }, cache: 'no-store' }).then(async (r) => {
-    if (!r.ok) throw new Error(`Sportmonks HTTP ${r.status} for ${path.split('?')[0]}`);
-    return (await r.json()).data;
+  if (ttlSec > 0 && hit && Date.now() - hit.t < ttlSec * 1000) return hit.v;
+  stats.calls++;
+  const v = fetch(BASE + path, ({ headers: { Authorization: process.env.SPORTMONKS_TOKEN! }, cache: 'no-store' } as any)).then(async (r) => {
+    const rem = r.headers.get('x-ratelimit-remaining'); if (rem != null) stats.remaining = Number(rem);
+    const lim = r.headers.get('x-ratelimit-limit'); if (lim != null) stats.limit = Number(lim);
+    if (!r.ok) { stats.lastError = `HTTP ${r.status}`; throw new SportmonksError(r.status, `Sportmonks HTTP ${r.status} for ${path.split('?')[0]}`); }
+    return ((await r.json()) as any).data;
   });
   cache.set(path, { t: Date.now(), v });
   v.catch(() => cache.delete(path));
@@ -128,16 +135,19 @@ function baseView(f: any): MatchView | undefined {
 const DAY = 86_400_000;
 const ymd = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
-export async function smListMatches(): Promise<MatchView[]> {
+export async function smListMatches(opts: { ttl?: number } = {}): Promise<MatchView[]> {
   const now = Date.now();
-  const data = await sm(`fixtures?filter[starts_between]=${ymd(now - 10 * DAY)},${ymd(now + 21 * DAY)}&include=localteam,visitorteam,league,runs,venue&sort=starting_at`, TTL.list);
+  const data = await sm(`fixtures?filter[starts_between]=${ymd(now - 10 * DAY)},${ymd(now + 21 * DAY)}&include=localteam,visitorteam,league,runs,venue&sort=starting_at`, opts.ttl ?? TTL.list);
   return arr(data).map(baseView).filter(Boolean) as MatchView[];
 }
 
-export async function smGetMatch(id: string): Promise<MatchView | undefined> {
+export async function smGetMatch(id: string, opts: { ttl?: number } = {}): Promise<MatchView | undefined> {
   if (!/^\d+$/.test(id)) return undefined;
-  const known = (await smListMatches().catch(() => [])).find((m) => m.id === id);
-  const ttl = known?.status === 'live' ? TTL.live : known?.status === 'upcoming' ? TTL.upcoming : TTL.done;
+  let ttl = opts.ttl;
+  if (ttl === undefined) {
+    const known = (await smListMatches().catch(() => [])).find((m) => m.id === id);
+    ttl = known?.status === 'live' ? TTL.live : known?.status === 'upcoming' ? TTL.upcoming : TTL.done;
+  }
   const f = await sm(`fixtures/${id}?include=localteam,visitorteam,league,runs,venue,batting,bowling,balls,lineup,scoreboards`, ttl).catch(() => undefined);
   if (!f?.id) return undefined;
   const v = baseView(f);
@@ -190,3 +200,47 @@ export async function smGetMatch(id: string): Promise<MatchView | undefined> {
   }
   return v;
 }
+
+// ---------- rankings, careers, registry export ----------
+export interface RankingSet { gender: 'men' | 'women'; format: RankFormat; kind: 'team'; entries: RankingEntry[]; }
+
+export async function smRankings(): Promise<RankingSet[]> {
+  const data = arr(await sm('team-rankings', TTL.lookup));
+  return data.map((r: any): RankingSet => {
+    const format: RankFormat = r.type === 'T20I' ? 'T20' : r.type === 'ODI' ? 'ODI' : 'TEST';
+    const entries = arr(r.team).filter((t: any) => t.ranking?.position != null).map((t: any): RankingEntry => {
+      const teamId = regTeam(t);
+      return { rank: t.ranking.position, prev: t.ranking.position, teamId, name: t.name, rating: t.ranking.rating ?? t.ranking.points ?? 0 };
+    }).sort((a: RankingEntry, b: RankingEntry) => a.rank - b.rank);
+    return { gender: r.gender === 'women' ? 'women' : 'men', format, kind: 'team', entries };
+  });
+}
+
+const careerFormat = (t: string) => (/test/i.test(t) ? 'Test' : t);
+export async function smCareer(smPlayerId: number): Promise<CareerLine[]> {
+  const d = await sm(`players/${smPlayerId}?include=career`, TTL.lookup);
+  const rows = arr(d?.career);
+  const by = new Map<string, CareerLine>();
+  for (const row of rows) {
+    const f = careerFormat(String(row.type)); const l = by.get(f) ?? emptyCareerLine(f); by.set(f, l);
+    const b = row.batting, w = row.bowling;
+    l.matches += Math.max(b?.matches ?? 0, w?.matches ?? 0);
+    if (b) { l.innings += b.innings ?? 0; l.runs += b.runs_scored ?? 0; l.notOuts += b.not_outs ?? 0; l.balls += b.balls_faced ?? 0; l.highest = Math.max(l.highest, b.highest_inning_score ?? 0); l.fours += b.four_x ?? 0; l.sixes += b.six_x ?? 0; l.hundreds += b.hundreds ?? 0; l.fifties += b.fifties ?? 0; }
+    if (w) { l.bowlInnings += w.innings ?? 0; l.overs += w.overs ?? 0; l.runsConceded += w.runs ?? 0; l.wickets += w.wickets ?? 0; l.fiveWickets += w.five_wickets ?? 0; }
+  }
+  return [...by.values()].map((l) => ({
+    ...l, overs: +l.overs.toFixed(1),
+    avg: l.innings - l.notOuts > 0 ? +(l.runs / (l.innings - l.notOuts)).toFixed(2) : 0, sr: l.balls ? +((l.runs / l.balls) * 100).toFixed(1) : 0,
+    bowlAvg: l.wickets ? +(l.runsConceded / l.wickets).toFixed(2) : 0, econ: l.overs ? +(l.runsConceded / l.overs).toFixed(2) : 0,
+  })).filter((l) => l.matches > 0).sort((a, b) => b.matches - a.matches);
+}
+
+/** Entities discovered while mapping, with their Sportmonks ids, for persistence by the worker. */
+export function exportRegistry() {
+  const teamRows: { smId: number; team: Team }[] = [];
+  teamMap.forEach((id, smId) => { const team = teams.find((t) => t.id === id); if (team) teamRows.push({ smId, team }); });
+  const playerRows: { smId: number; player: Player }[] = [];
+  playerMap.forEach((id, smId) => { const player = players.find((p) => p.id === id); if (player) playerRows.push({ smId, player }); });
+  return { teams: teamRows, players: playerRows, series: [...series] };
+}
+export const smPlayerIdOf = (slug: string) => { for (const [smId, id] of playerMap) if (id === slug) return smId; return undefined; };

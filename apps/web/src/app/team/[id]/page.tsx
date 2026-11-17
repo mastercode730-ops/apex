@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { teamById, squadOf, articles, rankings } from '@apex/core';
-import { getMatchesByTeam, getAllMatches } from '@/lib/data';
+import { teamById, squadOf } from '@apex/core';
+import { getMatchesByTeam, getAllMatches, getRankings, getArticles } from '@/lib/data';
 import { MatchCard } from '@/components/MatchCard';
 import { Breadcrumbs, JsonLd, PageTitle, PlayerAvatar, SectionHeader, TabLinks, TeamBadge } from '@/components/ui';
 import { pageMeta, timeAgo, SITE } from '@/lib/site';
@@ -20,8 +20,8 @@ export default async function TeamPage({ params, searchParams }: Props) {
   const { id } = await params; const { tab = 'overview' } = await searchParams;
   await getAllMatches();
   const t = teamById(id); if (!t) notFound();
-  const ms = await getMatchesByTeam(t.id), squad = squadOf(t.id), news = articles.filter((a) => a.teamIds?.includes(t.id));
-  const rank = (['TEST', 'ODI', 'T20'] as const).map((f) => ({ f, r: rankings('team', f).find((x) => x.teamId === t.id) })).filter((x) => x.r) as { f: string; r: { rank: number; rating: number } }[];
+  const ms = await getMatchesByTeam(t.id), squad = squadOf(t.id), news = await getArticles({ teamId: t.id });
+  const rank = (await Promise.all((['TEST', 'ODI', 'T20'] as const).map(async (f) => ({ f, r: (await getRankings('team', f, 'men')).find((x) => x.teamId === t.id) })))).filter((x) => x.r) as { f: string; r: { rank: number; rating: number } }[];
   const base = `/team/${t.id}`;
   return (
     <>
