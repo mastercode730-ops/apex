@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { allMatches, teams, seriesById } from '@apex/core';
+import { teams, seriesById } from '@apex/core';
+import { getAllMatches } from '@/lib/data';
 import { MatchCard } from '@/components/MatchCard';
 import { Breadcrumbs, PageTitle } from '@/components/ui';
 import { pageMeta, fmtDay } from '@/lib/site';
@@ -9,7 +10,7 @@ export const metadata = pageMeta({ title: 'Cricket Schedule & Fixtures', descrip
 
 export default async function Schedule({ searchParams }: { searchParams: Promise<{ team?: string; format?: string; type?: string }> }) {
   const { team = '', format = '', type = '' } = await searchParams;
-  const list = allMatches()
+  const list = (await getAllMatches())
     .filter((m) => (!team || m.team1Id === team || m.team2Id === team) && (!format || m.format === format) && (!type || seriesById(m.seriesId)?.kind === type))
     .sort((a, b) => +new Date(a.startTime) - +new Date(b.startTime));
   const byDay = new Map<string, typeof list>();

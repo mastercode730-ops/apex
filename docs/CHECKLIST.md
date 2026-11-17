@@ -85,3 +85,12 @@ Legend: PASS / PARTIAL / FAIL / EXT (needs external verification) / N/A
 - `packages/core/src/vendor.ts`: `VendorAdapter` contract (live, fixtures, match) and env-based provider selection (`APEX_DATA_PROVIDER=demo|database`).
 - `/api/matches/[id]/stream`: Server-Sent Events. The match page refreshes only when the score changes, falling back to polling.
 - Still needed once a vendor is chosen: the adapter, an ingestion worker (separate Node service), database + Redis provisioning, and a `database` provider that reads Postgres.
+
+## 7. Sportmonks adapter (added)
+- `apps/web/src/lib/sportmonks.ts` maps Sportmonks Cricket API v2.0 fixtures to Apex types: scorecards (batting, bowling, fall of wickets, extras), ball-by-ball commentary, recent overs, toss, venue, lineups. Teams, players and series are discovered from the feed.
+- `apps/web/src/lib/data.ts` is the async facade; `APEX_DATA_PROVIDER=demo|sportmonks` selects the source. Demo remains the default.
+- In-process cache with TTLs (list 60 s, live match 30 s, finished 1 h) keeps usage inside the free plan's 180 calls/hour. This cache is per server process; with several instances use Redis.
+- Points tables use real results and real net run rate.
+- **Verified against real data:** 15 fixtures, 75 match-page URLs (all tabs), series, team, player, OG image, 404. **Not verified:** a live in-play match (none was on during testing).
+- **Still demo data even in sportmonks mode:** rankings, stats leaders, player career stats, news. Win probability is not provided by the feed, so it is hidden for real matches.
+- **Free plan limits:** only 3 leagues (T20I, BBL, CSA T20 Challenge), no IPL or Tests. A paid plan or second vendor is needed for launch.

@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { teams, players, series, articles, allMatches } from '@apex/core';
+import { teams, players, series, articles } from '@apex/core';
+import { getAllMatches } from '@/lib/data';
 import { Breadcrumbs, PageTitle } from '@/components/ui';
 import { pageMeta } from '@/lib/site';
 
@@ -7,12 +8,13 @@ export const metadata = pageMeta({ title: 'Search Cricket Teams, Players, Series
 
 export default async function Search({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const q = ((await searchParams).q ?? '').trim().toLowerCase();
+  const allM = await getAllMatches();
   const hit = (s: string) => q && s.toLowerCase().includes(q);
   const groups = [
     ['Teams', teams.filter((t) => hit(t.name) || hit(t.code)).map((t) => [t.name, `/team/${t.id}`])],
     ['Players', players.filter((p) => hit(p.name)).map((p) => [p.name, `/player/${p.id}`])],
     ['Series', series.filter((s) => hit(s.name)).map((s) => [s.name, `/series/${s.id}`])],
-    ['Matches', allMatches().filter((m) => hit(m.title)).map((m) => [m.title, `/cricket-live-score/${m.slug}`])],
+    ['Matches', allM.filter((m) => hit(m.title)).map((m) => [m.title, `/cricket-live-score/${m.slug}`])],
     ['News', articles.filter((a) => hit(a.title)).map((a) => [a.title, `/news/${a.slug}`])],
   ] as const;
   const total = groups.reduce((n, g) => n + g[1].length, 0);

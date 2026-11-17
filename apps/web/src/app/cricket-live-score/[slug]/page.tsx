@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getMatch, matchIdFromSlug, teamById, playerById, seriesById, squadOf } from '@apex/core';
+import { matchIdFromSlug, teamById, playerById, seriesById, squadOf } from '@apex/core';
+import { getMatchById } from '@/lib/data';
 import { Breadcrumbs, JsonLd, LiveBadge, PageTitle, PlayerAvatar, TabLinks, TeamBadge } from '@/components/ui';
 import { AnimatedNumber, LiveRefresh, WinProb } from '@/components/client';
 import { pageMeta, fmtDay, fmtTime, SITE } from '@/lib/site';
@@ -11,7 +12,7 @@ const FILTERS = [['all', 'All'], ['wicket', 'Wickets'], ['six', 'Sixes'], ['four
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const m = getMatch(matchIdFromSlug(slug));
+  const m = await getMatchById(matchIdFromSlug(slug));
   if (!m) return { title: 'Match not found' };
   const s = seriesById(m.seriesId);
   return pageMeta({ title: `${m.title} Live Score, Scorecard & Commentary | ${s?.short}`, description: `${m.title} at ${m.venue}, ${m.city}. ${m.statusLine}. Live score, full scorecard and ball-by-ball commentary.`, path: `/cricket-live-score/${m.slug}` , ownImage: true });
@@ -22,7 +23,7 @@ const TABS = [['live', 'Live'], ['scorecard', 'Scorecard'], ['commentary', 'Comm
 export default async function MatchPage({ params, searchParams }: Props) {
   const { slug } = await params;
   const { tab = 'live', f = 'all' } = await searchParams;
-  const m = getMatch(matchIdFromSlug(slug));
+  const m = await getMatchById(matchIdFromSlug(slug));
   if (!m || slug !== m.slug) notFound();
   const s = seriesById(m.seriesId)!;
   const t1 = teamById(m.team1Id)!, t2 = teamById(m.team2Id)!;
@@ -57,7 +58,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
           })}
         </div>
         <p className="mt-5 text-lg font-bold text-accent">{m.status === 'upcoming' ? `${fmtDay(m.startTime)} · ${fmtTime(m.startTime)}` : m.statusLine}</p>
-        {cur && <p className="mt-1 text-sm text-muted num">Run rate {cur.runRate}{cur.target ? ` · Target ${cur.target}` : ''} · Partnership {cur.partnership.runs} ({cur.partnership.balls})</p>}
+        {cur && <p className="mt-1 text-sm text-muted num">Run rate {cur.runRate}{cur.target ? ` · Target ${cur.target}` : ''} {cur.partnership.balls > 0 ? ` · Partnership ${cur.partnership.runs} (${cur.partnership.balls})` : ''}</p>}
         {m.winProb && <div className="mt-6"><WinProb t1={t1.code} t2={t2.code} p1={m.winProb.team1} /></div>}
       </section>
 

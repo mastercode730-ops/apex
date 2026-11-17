@@ -3,16 +3,19 @@ import Link from 'next/link';
 import { playerById, teamById, rankings, careerStats } from '@apex/core';
 import { Breadcrumbs, JsonLd, PageTitle, PlayerAvatar } from '@/components/ui';
 import { pageMeta, SITE } from '@/lib/site';
+import { ensurePlayer } from '@/lib/data';
 
 type Props = { params: Promise<{ id: string }> };
 export async function generateMetadata({ params }: Props) {
-  const p = playerById((await params).id);
+  const pid = (await params).id; await ensurePlayer(pid);
+  const p = playerById(pid);
   if (!p) return { title: 'Player not found' };
   return pageMeta({ title: `${p.name}: Profile, Stats & Rankings`, description: `${p.name} (${teamById(p.teamId)?.name}), ${p.role}. Batting style: ${p.battingStyle}. Career profile, rankings and stats.`, path: `/player/${p.id}` });
 }
 
 export default async function Player({ params }: Props) {
-  const p = playerById((await params).id); if (!p) notFound();
+  const pid = (await params).id; await ensurePlayer(pid);
+  const p = playerById(pid); if (!p) notFound();
   const t = teamById(p.teamId)!;
   const ranks = (['batter', 'bowler', 'allrounder'] as const).flatMap((k) => (['TEST', 'ODI', 'T20'] as const).map((f) => ({ k, f, r: rankings(k, f).find((x) => x.playerId === p.id) }))).filter((x) => x.r);
   const info: [string, string][] = [['Team', t.name], ['Role', p.role], ['Batting', p.battingStyle], ['Bowling', p.bowlingStyle], ['Born', p.born]];

@@ -2,6 +2,8 @@ import type { Article, RankingEntry, StatRow } from './types';
 import { players, slugify } from './players';
 import { teams } from './teams';
 import { hash, rng } from './rng';
+import { maxOvers } from './engine';
+import type { Format } from './types';
 
 export type RankKind = 'team' | 'batter' | 'bowler' | 'allrounder';
 export type RankFormat = 'TEST' | 'ODI' | 'T20';
@@ -77,19 +79,30 @@ export const categoryLabels: Record<Article['category'], string> = {
   reactions: 'Cricket Reactions', listicles: 'Cricket Listicles', stories: 'Cricket Stories',
 };
 
-export interface PointsRow { teamId: string; played: number; won: number; lost: number; points: number; nrr: number; }
-/** Points table derived from completed matches in a series (2 pts per win). */
-export function pointsTable(teamIds: string[], completed: { team1Id: string; team2Id: string; winnerId?: string }[]): PointsRow[] {
-  const rows = new Map<string, PointsRow>(teamIds.map((id) => [id, { teamId: id, played: 0, won: 0, lost: 0, points: 0, nrr: 0 }]));
+export interface PointsRow { teamId: string; played: number; won: number; lost: number; noResult: number; points: number; nrr: number; }
+interface PtsMatch { team1Id: string; team2Id: string; winnerId?: string; format?: Format; innings?: { battingTeamId: string; runs: number; wickets: number; ballsBowled: number }[]; }
+/** Points table from completed matches: 2 pts per win, 1 each for no result. NRR uses real run/over data (all out = full quota). */
+export function pointsTable(teamIds: string[], completed: PtsMatch[]): PointsRow[] {
+  type Acc = PointsRow & { rf: number; bf: number; ra: number; ba: number };
+  const rows = new Map<string, Acc>(teamIds.map((id) => [id, { teamId: id, played: 0, won: 0, lost: 0, noResult: 0, points: 0, nrr: 0, rf: 0, bf: 0, ra: 0, ba: 0 }]));
   for (const m of completed) {
     for (const id of [m.team1Id, m.team2Id]) {
       const row = rows.get(id); if (!row) continue;
       row.played++;
-      if (m.winnerId === id) { row.won++; row.points += 2; } else if (m.winnerId) row.lost++;
+      if (m.winnerId === id) { row.won++; row.points += 2; } else if (m.winnerId) row.lost++; else { row.noResult++; row.points += 1; }
+    }
+    if (m.winnerId && m.format && m.format !== 'TEST' && m.innings && m.innings.length === 2) {
+      const quota = maxOvers(m.format) * 6;
+      for (const inn of m.innings) {
+        const bat = rows.get(inn.battingTeamId); const opp = rows.get(inn.battingTeamId === m.team1Id ? m.team2Id : m.team1Id);
+        const balls = inn.wickets >= 10 ? quota : inn.ballsBowled;
+        if (bat) { bat.rf += inn.runs; bat.bf += balls; }
+        if (opp) { opp.ra += inn.runs; opp.ba += balls; }
+      }
     }
   }
-  const r = rng(hash(teamIds.join()));
-  return [...rows.values()].map((x) => ({ ...x, nrr: +(((x.won - x.lost) * 0.35) + (r() - 0.5) * 0.2).toFixed(3) })).sort((a, b) => b.points - a.points || b.nrr - a.nrr);
+  return [...rows.values()].map((x) => ({ teamId: x.teamId, played: x.played, won: x.won, lost: x.lost, noResult: x.noResult, points: x.points,
+    nrr: x.bf && x.ba ? +((x.rf / (x.bf / 6)) - (x.ra / (x.ba / 6))).toFixed(3) : 0 })).sort((a, b) => b.points - a.points || b.nrr - a.nrr);
 }
 
 export interface CareerRow { format: RankFormat; matches: number; runs: number; avg: number; sr: number; hundreds: number; wickets: number; econ: number; best: string; }

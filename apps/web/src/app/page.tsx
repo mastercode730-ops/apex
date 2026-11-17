@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { allMatches, series, articles, rankings, teams, categoryLabels } from '@apex/core';
+import { articles, rankings, teams, categoryLabels } from '@apex/core';
+import { getAllMatches, getSeriesList } from '@/lib/data';
 import { MatchCard } from '@/components/MatchCard';
 import { Reveal, LiveRefresh } from '@/components/client';
 import { SectionHeader, TeamBadge } from '@/components/ui';
@@ -8,11 +9,13 @@ import { pageMeta, fmtDate, timeAgo } from '@/lib/site';
 export const dynamic = 'force-dynamic';
 export const metadata = pageMeta({ title: 'Apex | Live Cricket Scores, Fixtures, Rankings & Stats', description: 'Follow live cricket scores ball by ball, full scorecards, fixtures, series, team and player stats, and rankings on Apex.', path: '/' });
 
-export default function Home() {
-  const matches = allMatches();
+export default async function Home() {
+  const matches = await getAllMatches();
+  const series = await getSeriesList();
   const live = matches.filter((m) => m.status === 'live');
-  const upcoming = matches.filter((m) => m.status === 'upcoming');
-  const done = matches.filter((m) => m.status === 'completed');
+  const byStart = (a: { startTime: string }, b: { startTime: string }) => +new Date(a.startTime) - +new Date(b.startTime);
+  const upcoming = matches.filter((m) => m.status === 'upcoming').sort(byStart);
+  const done = matches.filter((m) => m.status === 'completed').sort((a, b) => byStart(b, a));
   const top = rankings('batter', 'T20').slice(0, 5);
   return (
     <div className="grid gap-14">

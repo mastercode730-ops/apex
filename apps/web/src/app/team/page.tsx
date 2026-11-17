@@ -1,12 +1,14 @@
 import Link from 'next/link';
 import { teams } from '@apex/core';
+import { getAllMatches } from '@/lib/data';
 import { Breadcrumbs, PageTitle, TeamBadge } from '@/components/ui';
 import { Reveal } from '@/components/client';
 import { pageMeta } from '@/lib/site';
 
 export const metadata = pageMeta({ title: 'Cricket Teams', description: 'All international cricket teams with squads, fixtures, results and news.', path: '/team' });
 
-export default function Teams() {
+export default async function Teams() {
+  await getAllMatches();
   return (
     <>
       <Breadcrumbs items={[{ name: 'Teams', href: '/team' }]} />

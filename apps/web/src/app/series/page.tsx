@@ -1,12 +1,13 @@
 import Link from 'next/link';
-import { series } from '@apex/core';
+import { getSeriesList } from '@/lib/data';
 import { Breadcrumbs, PageTitle, TeamBadge } from '@/components/ui';
 import { Reveal } from '@/components/client';
 import { pageMeta, fmtDate } from '@/lib/site';
 
 export const metadata = pageMeta({ title: 'Cricket Series & Tournaments', description: 'Browse all cricket series, tours and tournaments with fixtures, squads, stats and news.', path: '/series' });
 
-export default function SeriesList() {
+export default async function SeriesList() {
+  const series = await getSeriesList();
   return (
     <>
       <Breadcrumbs items={[{ name: 'Series', href: '/series' }]} />

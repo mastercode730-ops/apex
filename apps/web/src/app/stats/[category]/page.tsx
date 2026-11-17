@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { stats, statCategories, series, playerById, teamById } from '@apex/core';
+import { stats, statCategories, playerById, teamById } from '@apex/core';
+import { getSeriesList } from '@/lib/data';
 import { Breadcrumbs, PageTitle, TeamBadge } from '@/components/ui';
 import { pageMeta } from '@/lib/site';
 
@@ -13,7 +14,7 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function StatsPage({ params, searchParams }: Props) {
-  const { category } = await params; const { series: sid = series[0].id } = await searchParams;
+  const { category } = await params; const series = await getSeriesList(); const { series: sid = series[0]?.id ?? '' } = await searchParams;
   const c = statCategories.find((x) => x.id === category); if (!c) notFound();
   const rows = stats(c.id, sid);
   return (

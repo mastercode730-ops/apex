@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { teamById, matchesByTeam, squadOf, articles, rankings } from '@apex/core';
+import { teamById, squadOf, articles, rankings } from '@apex/core';
+import { getMatchesByTeam, getAllMatches } from '@/lib/data';
 import { MatchCard } from '@/components/MatchCard';
 import { Breadcrumbs, JsonLd, PageTitle, PlayerAvatar, SectionHeader, TabLinks, TeamBadge } from '@/components/ui';
 import { pageMeta, timeAgo, SITE } from '@/lib/site';
@@ -8,6 +9,7 @@ import { pageMeta, timeAgo, SITE } from '@/lib/site';
 export const dynamic = 'force-dynamic';
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string }> };
 export async function generateMetadata({ params }: Props) {
+  await getAllMatches();
   const t = teamById((await params).id);
   if (!t) return { title: 'Team not found' };
   return pageMeta({ title: `${t.name} Cricket Team: Squad, Matches, Rankings & News`, description: `${t.name} cricket team profile: squad, upcoming fixtures, recent results, rankings and latest news. ${t.bio}`, path: `/team/${t.id}` , ownImage: true });
@@ -16,9 +18,10 @@ const TABS = [['overview', 'Overview'], ['squad', 'Squad'], ['matches', 'Matches
 
 export default async function TeamPage({ params, searchParams }: Props) {
   const { id } = await params; const { tab = 'overview' } = await searchParams;
+  await getAllMatches();
   const t = teamById(id); if (!t) notFound();
-  const ms = matchesByTeam(t.id), squad = squadOf(t.id), news = articles.filter((a) => a.teamIds?.includes(t.id));
-  const rank = (['TEST', 'ODI', 'T20'] as const).map((f) => ({ f, r: rankings('team', f).find((x) => x.teamId === t.id)! }));
+  const ms = await getMatchesByTeam(t.id), squad = squadOf(t.id), news = articles.filter((a) => a.teamIds?.includes(t.id));
+  const rank = (['TEST', 'ODI', 'T20'] as const).map((f) => ({ f, r: rankings('team', f).find((x) => x.teamId === t.id) })).filter((x) => x.r) as { f: string; r: { rank: number; rating: number } }[];
   const base = `/team/${t.id}`;
   return (
     <>

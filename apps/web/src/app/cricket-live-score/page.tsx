@@ -1,4 +1,4 @@
-import { allMatches } from '@apex/core';
+import { getAllMatches } from '@/lib/data';
 import { MatchCard } from '@/components/MatchCard';
 import { LiveRefresh } from '@/components/client';
 import { Breadcrumbs, PageTitle, SectionHeader } from '@/components/ui';
@@ -7,8 +7,8 @@ import { pageMeta } from '@/lib/site';
 export const dynamic = 'force-dynamic';
 export const metadata = pageMeta({ title: 'Live Cricket Score, Scorecards & Match Updates', description: 'Live cricket scores with ball-by-ball updates, scorecards, win probability and results for every match on Apex.', path: '/cricket-live-score' });
 
-export default function LivePage() {
-  const all = allMatches();
+export default async function LivePage() {
+  const all = await getAllMatches();
   const groups = [['Live', all.filter((m) => m.status === 'live')], ['Upcoming', all.filter((m) => m.status === 'upcoming')], ['Completed', all.filter((m) => m.status === 'completed')]] as const;
   return (
     <>

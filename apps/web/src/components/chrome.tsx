@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { allMatches, teamById } from '@apex/core';
+import { teamById } from '@apex/core';
+import { getAllMatches } from '@/lib/data';
 import { NAV, SITE } from '@/lib/site';
 import { ThemeToggle, MobileMenu } from './client';
 
@@ -27,8 +28,8 @@ export function Header() {
   );
 }
 
-export function Ticker() {
-  const live = allMatches().filter((m) => m.status === 'live');
+export async function Ticker() {
+  const live = (await getAllMatches()).filter((m) => m.status === 'live');
   if (!live.length) return null;
   const items = [...live, ...live];
   return (
