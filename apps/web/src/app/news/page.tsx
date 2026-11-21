@@ -1,7 +1,9 @@
+import { Fragment } from 'react';
 import Link from 'next/link';
 import { categoryLabels, type Article } from '@apex/core';
 import { Breadcrumbs, PageTitle } from '@/components/ui';
 import { Reveal } from '@/components/client';
+import { AdSlot } from '@/components/ads';
 import { pageMeta, timeAgo } from '@/lib/site';
 import { getArticles } from '@/lib/data';
 
@@ -23,7 +25,9 @@ export default async function News({ searchParams }: { searchParams: Promise<{ c
       {!list.length && <p className="card p-8 text-center text-muted">No stories published yet.</p>}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {list.map((a, i) => (
-          <Reveal key={a.id} delay={(i % 3) * 0.07}>
+          <Fragment key={a.id}>
+          {i === 3 && <AdSlot kind="infeed" className="md:col-span-2 lg:col-span-3" />}
+          <Reveal delay={(i % 3) * 0.07}>
             <Link href={`/news/${a.slug}`} className="card card-hover block h-full p-6">
               <p className="text-xs font-bold uppercase tracking-wider text-accent">{categoryLabels[a.category]}</p>
               <h2 className="mt-2 font-display text-lg font-bold leading-snug">{a.title}</h2>
@@ -31,6 +35,7 @@ export default async function News({ searchParams }: { searchParams: Promise<{ c
               <p className="mt-4 text-xs text-muted">{a.author} · {timeAgo(a.publishedAt)}</p>
             </Link>
           </Reveal>
+          </Fragment>
         ))}
       </div>
     </>

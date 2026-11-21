@@ -4,6 +4,7 @@ import { matchIdFromSlug, teamById, playerById, seriesById, squadOf } from '@ape
 import { getMatchById } from '@/lib/data';
 import { Breadcrumbs, JsonLd, LiveBadge, PageTitle, PlayerAvatar, TabLinks, TeamBadge } from '@/components/ui';
 import { AnimatedNumber, LiveRefresh, WinProb } from '@/components/client';
+import { AdSlot } from '@/components/ads';
 import { pageMeta, fmtDay, fmtTime, SITE } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
@@ -62,6 +63,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
         {m.winProb && <div className="mt-6"><WinProb t1={t1.code} t2={t2.code} p1={m.winProb.team1} /></div>}
       </section>
 
+      <AdSlot kind="banner" className="mb-6" />
       <TabLinks current={tab} tabs={TABS.map(([k, l]) => ({ key: k, label: l, href: k === 'live' ? base : `${base}?tab=${k}` }))} />
 
       {(tab === 'live') && (
@@ -87,6 +89,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
                     <span className="num text-sm font-bold">{o.runs}</span></div>
                 ))}
               </section>
+              <AdSlot kind="rect" className="lg:col-span-2" />
               <section className="card p-5 lg:col-span-2" aria-label="Latest commentary">
                 <h2 className="mb-3 font-display text-lg font-bold">Latest commentary</h2>
                 <Commentary items={m.commentary.slice(0, 8)} />
@@ -97,7 +100,9 @@ export default async function MatchPage({ params, searchParams }: Props) {
       )}
 
       {tab === 'scorecard' && (m.innings.length ? m.innings.map((inn, idx) => (
-        <section key={idx} className="card mb-6 overflow-hidden" aria-label={`Innings ${idx + 1}`}>
+        <div key={idx}>
+        {idx === 1 && <AdSlot kind="banner" className="mb-6" />}
+        <section className="card mb-6 overflow-hidden" aria-label={`Innings ${idx + 1}`}>
           <h2 className="flex items-center justify-between bg-surface2 px-5 py-3 font-display text-lg font-bold"><span>{teamById(inn.battingTeamId)!.name}, innings {idx + 1}</span><span className="num">{inn.runs}/{inn.wickets} ({inn.overs})</span></h2>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[34rem] text-sm"><caption className="sr-only">Batting</caption>
@@ -112,6 +117,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
             {inn.fallOfWickets.length > 0 && <p className="border-t border-line px-5 py-3 text-sm text-muted"><b className="text-ink">Fall of wickets:</b> {inn.fallOfWickets.map((f) => `${f.runs}-${f.wicket} (${nm(f.playerId)}, ${f.over} ov)`).join(', ')}</p>}
           </div>
         </section>
+        </div>
       )) : <p className="card p-8 text-center text-muted">Scorecard will appear once play begins.</p>)}
 
       {tab === 'commentary' && (() => { const items = f === 'all' ? m.commentary : m.commentary.filter((c) => c.kind === f); return (

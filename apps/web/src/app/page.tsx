@@ -4,6 +4,7 @@ import { getAllMatches, getSeriesList, getHomeRankings, getArticles } from '@/li
 import { MatchCard } from '@/components/MatchCard';
 import { Reveal, LiveRefresh } from '@/components/client';
 import { SectionHeader, TeamBadge } from '@/components/ui';
+import { AdSlot } from '@/components/ads';
 import { pageMeta, fmtDate, timeAgo } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
@@ -44,6 +45,7 @@ export default async function Home() {
         <section aria-labelledby="up-h">
           <SectionHeader id="up-h" title="Upcoming" href="/schedule" />
           <div className="grid gap-4 sm:grid-cols-2">{upcoming.slice(0, 4).map((m, i) => <Reveal key={m.id} delay={i * 0.06}><MatchCard m={m} /></Reveal>)}</div>
+          <AdSlot kind="infeed" className="mt-10" />
           <div className="mt-10"><SectionHeader title="Recent results" href="/cricket-live-score" /></div>
           <div className="grid gap-4 sm:grid-cols-2">{done.slice(0, 4).map((m, i) => <Reveal key={m.id} delay={i * 0.06}><MatchCard m={m} /></Reveal>)}</div>
         </section>
@@ -61,12 +63,15 @@ export default async function Home() {
               ))}
             </ol>
           </Reveal>
+          <AdSlot kind="rect" />
           <Reveal>
             <SectionHeader title="Teams" href="/team" />
             <div className="flex flex-wrap gap-2">{teams.map((t) => <Link key={t.id} href={`/team/${t.id}`} className="chip"><TeamBadge id={t.id} size={20} />{t.name}</Link>)}</div>
           </Reveal>
         </aside>
       </div>
+
+      <AdSlot kind="banner" />
 
       <section aria-labelledby="series-h">
         <SectionHeader id="series-h" title="Featured series" href="/series" />

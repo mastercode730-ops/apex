@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { categoryLabels } from '@apex/core';
+import { AdSlot } from '@/components/ads';
 import { Breadcrumbs, JsonLd } from '@/components/ui';
 import { pageMeta, fmtDate, SITE } from '@/lib/site';
 import { getArticle, getArticles } from '@/lib/data';
@@ -23,7 +24,8 @@ export default async function ArticlePage({ params }: Props) {
       <p className="text-xs font-bold uppercase tracking-wider text-accent">{categoryLabels[a.category]}</p>
       <h1 className="mt-2 font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-5xl">{a.title}</h1>
       <p className="mt-4 text-sm text-muted">By {a.author} · <time dateTime={a.publishedAt}>{fmtDate(a.publishedAt)}</time></p>
-      <div className="mt-8 grid gap-5 text-lg leading-relaxed">{a.body.map((p, i) => <p key={i} className={i === 0 ? 'text-xl font-medium' : 'text-muted'}>{p}</p>)}</div>
+      <div className="mt-8 grid gap-5 text-lg leading-relaxed">{a.body.map((p, i) => <div key={i} className="grid gap-5">{i === 2 && <AdSlot kind="article" />}<p className={i === 0 ? 'text-xl font-medium' : 'text-muted'}>{p}</p></div>)}</div>
+      <AdSlot kind="article" className="mt-10" />
       {more.length > 0 && <aside className="mt-14 border-t border-line pt-8"><h2 className="mb-4 font-display text-xl font-bold">Related stories</h2><ul className="grid gap-3">{more.map((m) => <li key={m.id}><Link href={`/news/${m.slug}`} className="font-semibold text-accent hover:underline">{m.title}</Link></li>)}</ul></aside>}
     </article>
   );
