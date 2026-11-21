@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from 'next/font/google';
 import './globals.css';
 import { Header, Footer, Ticker } from '@/components/chrome';
 import { Consent } from '@/components/client';
+import { BackToTop, ScrollProgress, SmoothScroll } from '@/components/smooth';
 import { JsonLd } from '@/components/ui';
 import { SITE } from '@/lib/site';
 
@@ -30,10 +31,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${inter.variable} ${display.variable}`} suppressHydrationWarning>
       <head><script dangerouslySetInnerHTML={{ __html: themeInit }} /></head>
       <body>
+        <SmoothScroll />
+        <ScrollProgress />
         <Header />
         <Ticker />
         <main id="main" className="mx-auto min-h-[70vh] max-w-7xl px-4 py-6 sm:py-8 2xl:max-w-[90rem]">{children}</main>
         <Footer />
+        <BackToTop />
         <Consent gaId={process.env.NEXT_PUBLIC_GA_ID} />
         <JsonLd data={org} />
         <JsonLd data={site} />

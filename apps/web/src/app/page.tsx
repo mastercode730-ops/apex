@@ -22,16 +22,16 @@ export default async function Home() {
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-14">
       <LiveRefresh every={6000} />
-      <section aria-labelledby="hero" className="relative overflow-hidden rounded-3xl border border-line bg-surface p-6 sm:p-14">
+      <section aria-labelledby="hero" className="hero relative overflow-hidden rounded-[1.75rem] border border-line p-6 sm:p-14 lg:p-16">
         <div aria-hidden="true" className="absolute -right-24 -top-24 size-96 rounded-full bg-accent/20 blur-3xl" />
         <p className="float-in text-sm font-bold uppercase tracking-[0.18em] text-accent sm:tracking-[0.25em]">Every ball. Every record.</p>
         <h1 id="hero" className="float-in mt-3 max-w-3xl font-display text-[2rem] font-extrabold leading-[1.08] tracking-tight min-[400px]:text-4xl sm:text-6xl" style={{ animationDelay: '.08s' }}>
-          Live cricket, <span className="text-accent">at the speed of the game.</span>
+          Live cricket, <span className="text-gradient">at the speed of the game.</span>
         </h1>
         <p className="float-in mt-5 max-w-xl text-lg text-muted" style={{ animationDelay: '.16s' }}>Ball-by-ball scores, scorecards, win probability, fixtures, rankings and stats, in one fast, beautiful place.</p>
-        <div className="float-in mt-7 flex flex-wrap gap-3 [&>a]:flex-1 [&>a]:text-center sm:[&>a]:flex-none" style={{ animationDelay: '.24s' }}>
-          <Link href="/cricket-live-score" className="rounded-full bg-accent px-6 py-3 font-bold text-accentink transition hover:scale-105">Watch live scores</Link>
-          <Link href="/schedule" className="rounded-full border border-line px-6 py-3 font-bold transition hover:bg-surface2">Fixtures</Link>
+        <div className="float-in mt-7 flex flex-col gap-3 min-[420px]:flex-row min-[420px]:flex-wrap [&>a]:text-center" style={{ animationDelay: '.24s' }}>
+          <Link href="/cricket-live-score" className="btn btn-primary">Watch live scores</Link>
+          <Link href="/schedule" className="btn btn-ghost">Fixtures</Link>
         </div>
       </section>
 

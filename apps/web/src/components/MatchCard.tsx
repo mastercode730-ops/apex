@@ -16,13 +16,14 @@ export function MatchCard({ m }: { m: MatchView }) {
     );
   };
   return (
-    <Link href={`/cricket-live-score/${m.slug}`} className="card card-hover block p-4">
+    <Link href={`/cricket-live-score/${m.slug}`} className={`card card-hover group relative block overflow-hidden p-4 sm:p-5 ${m.status === 'live' ? 'ring-1 ring-live/30' : ''}`}>
+      {m.status === 'live' && <span aria-hidden="true" className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-live via-accent to-blue" />}
       <div className="mb-3 flex items-center justify-between gap-2 text-xs text-muted">
         <span className="truncate">{m.title.split(', ')[1]} · {s?.short}</span>
         {m.status === 'live' ? <LiveBadge /> : m.status === 'completed' ? <span className="font-semibold">Result</span> : <span className="font-semibold">Upcoming</span>}
       </div>
       <div className="grid gap-2.5">{row(m.team1Id)}{row(m.team2Id)}</div>
-      <p className={`mt-3 border-t border-line pt-3 text-sm font-medium ${m.status === 'live' ? 'text-accent' : 'text-muted'}`}>
+      <p className={`mt-3 border-t border-line pt-3 text-sm font-medium transition-colors group-hover:text-ink ${m.status === 'live' ? 'text-accent' : 'text-muted'}`}>
         {m.status === 'upcoming' ? `${fmtDay(m.startTime)} · ${fmtTime(m.startTime)}` : m.statusLine}
       </p>
     </Link>

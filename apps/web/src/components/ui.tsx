@@ -38,8 +38,8 @@ export function LiveBadge() {
 export function SectionHeader({ title, href, linkLabel = 'View all', id }: { title: string; href?: string; linkLabel?: string; id?: string }) {
   return (
     <div className="mb-4 flex items-end justify-between gap-4">
-      <h2 id={id} className="font-display text-xl font-bold tracking-tight sm:text-2xl">{title}</h2>
-      {href && <Link href={href} className="text-sm font-semibold text-accent hover:underline">{linkLabel} →</Link>}
+      <h2 id={id} className="flex items-center gap-3 font-display text-xl font-bold tracking-tight sm:text-2xl"><span aria-hidden="true" className="h-6 w-1 rounded-full bg-accent" />{title}</h2>
+      {href && <Link href={href} className="group shrink-0 text-sm font-semibold text-accent">{linkLabel} <span aria-hidden="true" className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span></Link>}
     </div>
   );
 }

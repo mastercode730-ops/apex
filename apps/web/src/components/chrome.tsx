@@ -3,18 +3,17 @@ import { teamById } from '@apex/core';
 import { getAllMatches } from '@/lib/data';
 import { NAV, SITE } from '@/lib/site';
 import { ThemeToggle, MobileMenu } from './client';
+import { NavLinks } from './smooth';
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-bg/80 backdrop-blur-xl">
+    <header className="site-header sticky top-0 z-40">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-2 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-3 focus:py-2 focus:text-accentink">Skip to content</a>
-      <div className="relative mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:gap-4">
-        <Link href="/" className="flex items-center gap-2 font-display text-xl font-extrabold tracking-tight" aria-label="Apex home">
-          <span aria-hidden="true" className="grid size-8 place-items-center rounded-lg bg-accent text-accentink">▲</span> APEX
+      <div className="header-inner relative mx-auto flex max-w-7xl 2xl:max-w-[90rem] items-center gap-3 px-4 sm:gap-4">
+        <Link href="/" className="group flex items-center gap-2 font-display text-xl font-extrabold tracking-tight" aria-label="Apex home">
+          <span aria-hidden="true" className="logo-mark grid size-8 place-items-center rounded-lg bg-accent text-accentink transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:rotate-[-6deg]">▲</span> APEX
         </Link>
-        <nav aria-label="Primary" className="ml-4 hidden gap-1 lg:flex">
-          {NAV.map((n) => <Link key={n.href} href={n.href} className="rounded-full px-3 py-1.5 text-sm font-semibold text-muted transition hover:bg-surface2 hover:text-ink">{n.label}</Link>)}
-        </nav>
+        <NavLinks items={NAV} />
         <div className="ml-auto flex items-center gap-2">
           <form action="/search" role="search" className="hidden lg:block">
             <input name="q" type="search" placeholder="Search teams, players, series" aria-label="Search" className="w-40 rounded-full border border-line bg-surface px-4 py-2 text-sm outline-none transition focus:w-52 focus:border-accent xl:w-56 xl:focus:w-72" />
@@ -57,7 +56,7 @@ export function Footer() {
   ];
   return (
     <footer className="mt-20 border-t border-line bg-surface/50">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr]">
+      <div className="mx-auto grid max-w-7xl gap-10 2xl:max-w-[90rem] px-4 py-12 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr]">
         <div className="sm:col-span-2 lg:col-span-1">
           <p className="font-display text-2xl font-extrabold">APEX</p>
           <p className="mt-3 max-w-sm text-sm text-muted">{SITE.tagline}.</p>
