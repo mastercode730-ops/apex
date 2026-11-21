@@ -66,7 +66,7 @@ export function ThemeToggle() {
     try { localStorage.setItem('apex-theme', next); } catch {}
   };
   return (
-    <button onClick={toggle} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`} className="grid size-9 place-items-center rounded-full border border-line bg-surface text-lg transition hover:scale-110">
+    <button onClick={toggle} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`} className="grid size-10 place-items-center rounded-full border border-line bg-surface text-lg transition hover:scale-110">
       <span aria-hidden="true">{theme === 'dark' ? '☀' : '☾'}</span>
     </button>
   );
@@ -75,14 +75,14 @@ export function ThemeToggle() {
 export function MobileMenu({ items }: { items: { href: string; label: string }[] }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="md:hidden">
-      <button aria-expanded={open} aria-controls="mobile-nav" aria-label="Menu" onClick={() => setOpen((o) => !o)} className="grid size-9 place-items-center rounded-full border border-line bg-surface">
+    <div className="lg:hidden">
+      <button aria-expanded={open} aria-controls="mobile-nav" aria-label="Menu" onClick={() => setOpen((o) => !o)} className="grid size-10 place-items-center rounded-full border border-line bg-surface">
         <span aria-hidden="true">{open ? '✕' : '☰'}</span>
       </button>
       {open && (
         <motion.nav id="mobile-nav" aria-label="Mobile" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="absolute inset-x-0 top-full border-b border-line bg-bg/95 p-4 backdrop-blur">
-          <ul className="grid grid-cols-2 gap-2">
-            {items.map((i) => <li key={i.href}><a href={i.href} onClick={() => setOpen(false)} className="block rounded-xl bg-surface px-4 py-3 font-semibold">{i.label}</a></li>)}
+          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {items.map((i) => <li key={i.href}><a href={i.href} onClick={() => setOpen(false)} className="block rounded-xl bg-surface px-4 py-3.5 font-semibold">{i.label}</a></li>)}
           </ul>
         </motion.nav>
       )}
@@ -109,7 +109,7 @@ export function Consent({ gaId }: { gaId?: string }) {
   const choose = (v: 'granted' | 'denied') => { setState(v); try { localStorage.setItem('apex-consent', v); } catch {} };
   if (state !== 'unknown') return null;
   return (
-    <motion.div role="dialog" aria-label="Cookie consent" initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="card fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-2xl flex-col gap-3 p-4 sm:flex-row sm:items-center">
+    <motion.div role="dialog" aria-label="Cookie consent" initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="card fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 mx-auto flex max-w-2xl flex-col gap-3 p-4 sm:flex-row sm:items-center">
       <p className="flex-1 text-sm text-muted">We use privacy-friendly analytics only if you agree. See our <a className="text-accent underline" href="/privacy-policy">Privacy Policy</a>.</p>
       <div className="flex gap-2">
         <button onClick={() => choose('denied')} className="chip">Decline</button>
@@ -137,9 +137,9 @@ export function ContactForm() {
     if (!siteKey || document.getElementById('cf-ts')) return;
     const sc = document.createElement('script'); sc.id = 'cf-ts'; sc.async = true; sc.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js'; document.head.appendChild(sc);
   }, [siteKey]);
-  const field = 'w-full rounded-xl border border-line bg-surface2 px-4 py-3 outline-none transition focus:border-accent';
+  const field = 'w-full min-w-0 rounded-xl border border-line bg-surface2 px-4 py-3 outline-none transition focus:border-accent';
   return (
-    <form onSubmit={onSubmit} className="card grid max-w-xl gap-4 p-6" noValidate>
+    <form onSubmit={onSubmit} className="card grid max-w-xl gap-4 p-4 sm:p-6" noValidate>
       <label className="grid gap-1.5 text-sm font-semibold">Name<input name="name" required minLength={2} maxLength={80} autoComplete="name" className={field} /></label>
       <label className="grid gap-1.5 text-sm font-semibold">Email<input name="email" type="email" required maxLength={120} autoComplete="email" className={field} /></label>
       <label className="grid gap-1.5 text-sm font-semibold">Message<textarea name="message" required minLength={10} maxLength={2000} rows={5} className={field} /></label>

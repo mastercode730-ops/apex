@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: { siteName: SITE.name, type: 'website', locale: 'en_GB', url: SITE.url, title: SITE.name, description: SITE.description, images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Apex live cricket' }] },
   twitter: { card: 'summary_large_image' },
 };
-export const viewport: Viewport = { themeColor: [{ media: '(prefers-color-scheme: dark)', color: '#080b12' }, { media: '(prefers-color-scheme: light)', color: '#f4f6fb' }] };
+export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: [{ media: '(prefers-color-scheme: dark)', color: '#080b12' }, { media: '(prefers-color-scheme: light)', color: '#f4f6fb' }] };
 
 const themeInit = `try{var t=localStorage.getItem('apex-theme');if(t)document.documentElement.dataset.theme=t;else if(!matchMedia('(prefers-color-scheme: light)').matches)document.documentElement.dataset.theme='dark';else document.documentElement.dataset.theme='light'}catch(e){}`;
 
@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Header />
         <Ticker />
-        <main id="main" className="mx-auto min-h-[70vh] max-w-7xl px-4 py-8">{children}</main>
+        <main id="main" className="mx-auto min-h-[70vh] max-w-7xl px-4 py-6 sm:py-8 2xl:max-w-[90rem]">{children}</main>
         <Footer />
         <Consent gaId={process.env.NEXT_PUBLIC_GA_ID} />
         <JsonLd data={org} />

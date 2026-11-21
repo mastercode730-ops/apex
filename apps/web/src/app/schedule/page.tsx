@@ -19,13 +19,13 @@ export default async function Schedule({ searchParams }: { searchParams: Promise
     <>
       <Breadcrumbs items={[{ name: 'Fixtures', href: '/schedule' }]} />
       <PageTitle sub="Every match, grouped by day.">Cricket Schedule & Fixtures</PageTitle>
-      <form className="card mb-8 flex flex-wrap items-end gap-4 p-4" aria-label="Filter fixtures">
+      <form className="card mb-8 grid grid-cols-1 items-end gap-4 p-4 min-[480px]:grid-cols-2 lg:flex lg:flex-wrap" aria-label="Filter fixtures">
         <label className="grid gap-1 text-xs font-bold uppercase tracking-wider text-muted">Team
-          <select name="team" defaultValue={team} className="rounded-xl border border-line bg-surface2 px-3 py-2 text-sm normal-case text-ink"><option value="">All teams</option>{teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
+          <select name="team" defaultValue={team} className="w-full rounded-xl border border-line bg-surface2 px-3 py-2.5 text-base normal-case sm:text-sm text-ink"><option value="">All teams</option>{teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}</select></label>
         <label className="grid gap-1 text-xs font-bold uppercase tracking-wider text-muted">Format
-          <select name="format" defaultValue={format} className="rounded-xl border border-line bg-surface2 px-3 py-2 text-sm normal-case text-ink"><option value="">All formats</option>{['TEST', 'ODI', 'T20', 'T10'].map((f) => <option key={f}>{f}</option>)}</select></label>
+          <select name="format" defaultValue={format} className="w-full rounded-xl border border-line bg-surface2 px-3 py-2.5 text-base normal-case sm:text-sm text-ink"><option value="">All formats</option>{['TEST', 'ODI', 'T20', 'T10'].map((f) => <option key={f}>{f}</option>)}</select></label>
         <label className="grid gap-1 text-xs font-bold uppercase tracking-wider text-muted">Series type
-          <select name="type" defaultValue={type} className="rounded-xl border border-line bg-surface2 px-3 py-2 text-sm normal-case text-ink"><option value="">All series</option>{['International', 'League', 'Domestic'].map((f) => <option key={f}>{f}</option>)}</select></label>
+          <select name="type" defaultValue={type} className="w-full rounded-xl border border-line bg-surface2 px-3 py-2.5 text-base normal-case sm:text-sm text-ink"><option value="">All series</option>{['International', 'League', 'Domestic'].map((f) => <option key={f}>{f}</option>)}</select></label>
         <button className="rounded-xl bg-accent px-5 py-2 text-sm font-bold text-accentink">Apply</button>
         {(team || format || type) && <Link href="/schedule" className="text-sm text-accent underline">Clear</Link>}
       </form>

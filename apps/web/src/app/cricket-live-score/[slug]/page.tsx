@@ -38,7 +38,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
       <Breadcrumbs items={[{ name: 'Live Scores', href: '/cricket-live-score' }, { name: s.short, href: `/series/${s.id}` }, { name: m.title, href: base }]} />
       <PageTitle>{t1.name} vs {t2.name}, {m.title.split(', ')[1]}</PageTitle>
 
-      <section aria-label="Scoreboard" className="card relative mb-6 overflow-hidden p-6 sm:p-8">
+      <section aria-label="Scoreboard" className="card relative mb-6 overflow-hidden p-4 sm:p-8">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-2 text-sm text-muted">
           <span>{s.name} · {m.format}</span>
           {m.status === 'live' ? <LiveBadge /> : <span className="font-semibold">{m.status === 'completed' ? 'Completed' : 'Upcoming'}</span>}
@@ -47,11 +47,11 @@ export default async function MatchPage({ params, searchParams }: Props) {
           {[t1, t2].map((t) => {
             const inn = m.innings.find((i) => i.battingTeamId === t.id);
             return (
-              <div key={t.id} className="flex items-center gap-4">
+              <div key={t.id} className="flex min-w-0 items-center gap-3 sm:gap-4">
                 <TeamBadge id={t.id} size={56} />
                 <div>
                   <p className="font-semibold text-muted">{t.name}</p>
-                  {inn ? <p className="font-display text-4xl font-extrabold"><AnimatedNumber value={inn.runs} />/<AnimatedNumber value={inn.wickets} /> <span className="text-base font-medium text-muted">({inn.overs})</span></p> : <p className="font-display text-2xl text-muted">Yet to bat</p>}
+                  {inn ? <p className="font-display text-3xl font-extrabold sm:text-4xl"><AnimatedNumber value={inn.runs} />/<AnimatedNumber value={inn.wickets} /> <span className="text-base font-medium text-muted">({inn.overs})</span></p> : <p className="font-display text-2xl text-muted">Yet to bat</p>}
                 </div>
               </div>
             );
@@ -127,7 +127,7 @@ export default async function MatchPage({ params, searchParams }: Props) {
       )}
 
       {tab === 'info' && (
-        <dl className="card grid gap-4 p-6 sm:grid-cols-2">
+        <dl className="card grid gap-4 p-4 sm:grid-cols-2 sm:p-6">
           {[['Match', m.title], ['Series', s.name], ['Format', m.format], ['Venue', `${m.venue}, ${m.city}`], ['Date', `${fmtDay(m.startTime)} ${fmtTime(m.startTime)}`], ['Toss', m.toss ?? ''], ['Umpires', m.umpires.join(', ')]].map(([k, v]) => (
             <div key={k}><dt className="text-xs font-bold uppercase tracking-wider text-muted">{k}</dt><dd className="mt-1 font-semibold">{v}</dd></div>
           ))}
@@ -141,9 +141,9 @@ function Commentary({ items }: { items: { id: string; over: string; text: string
   return (
     <ol className="divide-y divide-line">
       {items.map((c) => (
-        <li key={c.id} className="flex gap-4 py-3">
+        <li key={c.id} className="flex gap-3 py-3 sm:gap-4">
           <span className={`num grid h-8 w-12 shrink-0 place-items-center rounded-lg text-xs font-bold ${c.kind === 'wicket' ? 'bg-live text-white' : c.kind === 'six' ? 'bg-accent text-accentink' : c.kind === 'four' ? 'bg-blue text-white' : 'bg-surface2'}`}>{c.over}</span>
-          <p className={c.kind === 'wicket' ? 'font-bold' : ''}>{c.text}</p>
+          <p className={`min-w-0 break-words ${c.kind === 'wicket' ? 'font-bold' : ''}`}>{c.text}</p>
         </li>
       ))}
     </ol>

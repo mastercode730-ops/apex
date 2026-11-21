@@ -8,18 +8,18 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-bg/80 backdrop-blur-xl">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-2 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-3 focus:py-2 focus:text-accentink">Skip to content</a>
-      <div className="relative mx-auto flex h-16 max-w-7xl items-center gap-4 px-4">
+      <div className="relative mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:gap-4">
         <Link href="/" className="flex items-center gap-2 font-display text-xl font-extrabold tracking-tight" aria-label="Apex home">
           <span aria-hidden="true" className="grid size-8 place-items-center rounded-lg bg-accent text-accentink">▲</span> APEX
         </Link>
-        <nav aria-label="Primary" className="ml-4 hidden gap-1 md:flex">
+        <nav aria-label="Primary" className="ml-4 hidden gap-1 lg:flex">
           {NAV.map((n) => <Link key={n.href} href={n.href} className="rounded-full px-3 py-1.5 text-sm font-semibold text-muted transition hover:bg-surface2 hover:text-ink">{n.label}</Link>)}
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <form action="/search" role="search" className="hidden sm:block">
-            <input name="q" type="search" placeholder="Search teams, players, series" aria-label="Search" className="w-56 rounded-full border border-line bg-surface px-4 py-2 text-sm outline-none transition focus:w-72 focus:border-accent" />
+          <form action="/search" role="search" className="hidden lg:block">
+            <input name="q" type="search" placeholder="Search teams, players, series" aria-label="Search" className="w-40 rounded-full border border-line bg-surface px-4 py-2 text-sm outline-none transition focus:w-52 focus:border-accent xl:w-56 xl:focus:w-72" />
           </form>
-          <Link href="/search" aria-label="Search" className="grid size-9 place-items-center rounded-full border border-line bg-surface sm:hidden"><span aria-hidden="true">⌕</span></Link>
+          <Link href="/search" aria-label="Search" className="grid size-10 place-items-center rounded-full border border-line bg-surface lg:hidden"><span aria-hidden="true">⌕</span></Link>
           <ThemeToggle />
           <MobileMenu items={NAV} />
         </div>
@@ -57,8 +57,8 @@ export function Footer() {
   ];
   return (
     <footer className="mt-20 border-t border-line bg-surface/50">
-      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-[2fr_1fr_1fr]">
-        <div>
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr]">
+        <div className="sm:col-span-2 lg:col-span-1">
           <p className="font-display text-2xl font-extrabold">APEX</p>
           <p className="mt-3 max-w-sm text-sm text-muted">{SITE.tagline}.</p>
           {(process.env.NEXT_PUBLIC_APP_STORE_URL || process.env.NEXT_PUBLIC_PLAY_STORE_URL) && (

@@ -20,16 +20,16 @@ export default async function Home() {
   const top = home.rows.slice(0, 5);
   const news = await getArticles({ limit: 3 });
   return (
-    <div className="grid gap-14">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-14">
       <LiveRefresh every={6000} />
-      <section aria-labelledby="hero" className="relative overflow-hidden rounded-3xl border border-line bg-surface p-8 sm:p-14">
+      <section aria-labelledby="hero" className="relative overflow-hidden rounded-3xl border border-line bg-surface p-6 sm:p-14">
         <div aria-hidden="true" className="absolute -right-24 -top-24 size-96 rounded-full bg-accent/20 blur-3xl" />
-        <p className="float-in text-sm font-bold uppercase tracking-[0.25em] text-accent">Every ball. Every record.</p>
-        <h1 id="hero" className="float-in mt-3 max-w-3xl font-display text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl" style={{ animationDelay: '.08s' }}>
+        <p className="float-in text-sm font-bold uppercase tracking-[0.18em] text-accent sm:tracking-[0.25em]">Every ball. Every record.</p>
+        <h1 id="hero" className="float-in mt-3 max-w-3xl font-display text-[2rem] font-extrabold leading-[1.08] tracking-tight min-[400px]:text-4xl sm:text-6xl" style={{ animationDelay: '.08s' }}>
           Live cricket, <span className="text-accent">at the speed of the game.</span>
         </h1>
         <p className="float-in mt-5 max-w-xl text-lg text-muted" style={{ animationDelay: '.16s' }}>Ball-by-ball scores, scorecards, win probability, fixtures, rankings and stats, in one fast, beautiful place.</p>
-        <div className="float-in mt-7 flex flex-wrap gap-3" style={{ animationDelay: '.24s' }}>
+        <div className="float-in mt-7 flex flex-wrap gap-3 [&>a]:flex-1 [&>a]:text-center sm:[&>a]:flex-none" style={{ animationDelay: '.24s' }}>
           <Link href="/cricket-live-score" className="rounded-full bg-accent px-6 py-3 font-bold text-accentink transition hover:scale-105">Watch live scores</Link>
           <Link href="/schedule" className="rounded-full border border-line px-6 py-3 font-bold transition hover:bg-surface2">Fixtures</Link>
         </div>
@@ -40,7 +40,7 @@ export default async function Home() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{live.map((m, i) => <Reveal key={m.id} delay={i * 0.07}><MatchCard m={m} /></Reveal>)}</div>
       </section>
 
-      <div className="grid gap-14 lg:grid-cols-[1.4fr_1fr]">
+      <div className="grid gap-14 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <section aria-labelledby="up-h">
           <SectionHeader id="up-h" title="Upcoming" href="/schedule" />
           <div className="grid gap-4 sm:grid-cols-2">{upcoming.slice(0, 4).map((m, i) => <Reveal key={m.id} delay={i * 0.06}><MatchCard m={m} /></Reveal>)}</div>
@@ -72,7 +72,7 @@ export default async function Home() {
         <SectionHeader id="series-h" title="Featured series" href="/series" />
         <div className="no-scrollbar -mx-4 flex gap-4 overflow-x-auto px-4 pb-2">
           {series.map((s) => (
-            <Link key={s.id} href={`/series/${s.id}`} className="card card-hover w-64 shrink-0 p-5">
+            <Link key={s.id} href={`/series/${s.id}`} className="card card-hover w-60 shrink-0 p-5 sm:w-64">
               <div className="mb-3 flex -space-x-2">{s.teamIds.slice(0, 3).map((t) => <TeamBadge key={t} id={t} size={32} />)}</div>
               <h3 className="font-display font-bold">{s.short}</h3>
               <p className="mt-1 text-sm text-muted">{fmtDate(s.start)} – {fmtDate(s.end)}</p>
