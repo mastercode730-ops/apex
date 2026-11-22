@@ -109,7 +109,7 @@ export function Consent({ gaId }: { gaId?: string }) {
   const choose = (v: 'granted' | 'denied') => { setState(v); try { localStorage.setItem('apex-consent', v); } catch {} };
   if (state !== 'unknown') return null;
   return (
-    <motion.div role="dialog" aria-label="Cookie consent" initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="card fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 mx-auto flex max-w-2xl flex-col gap-3 p-4 sm:flex-row sm:items-center">
+    <motion.div role="dialog" aria-label="Cookie consent" initial={{ y: 80, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="card consent-card fixed inset-x-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-50 mx-auto flex max-w-2xl flex-col gap-3 p-4 sm:flex-row sm:items-center">
       <p className="flex-1 text-sm text-muted">We use privacy-friendly analytics only if you agree. See our <a className="text-accent underline" href="/privacy-policy">Privacy Policy</a>.</p>
       <div className="flex gap-2">
         <button onClick={() => choose('denied')} className="chip">Decline</button>

@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { teamById } from '@apex/core';
-import { getAllMatches } from '@/lib/data';
+import { getAllMatches, getSeriesList } from '@/lib/data';
 import { NAV, SITE } from '@/lib/site';
-import { ThemeToggle, MobileMenu } from './client';
+import { ThemeToggle } from './client';
+import { TabBar } from './tabbar';
 import { NavLinks } from './smooth';
 
 export function Header() {
@@ -18,13 +19,23 @@ export function Header() {
           <form action="/search" role="search" className="hidden lg:block">
             <input name="q" type="search" placeholder="Search teams, players, series" aria-label="Search" className="w-40 rounded-full border border-line bg-surface px-4 py-2 text-sm outline-none transition focus:w-52 focus:border-accent xl:w-56 xl:focus:w-72" />
           </form>
-          <Link href="/search" aria-label="Search" className="grid size-10 place-items-center rounded-full border border-line bg-surface lg:hidden"><span aria-hidden="true">⌕</span></Link>
-          <ThemeToggle />
-          <MobileMenu items={NAV} />
+          <Link href="/search" aria-label="Search" className="search-pill lg:hidden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" className="size-[1.1rem]"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
+            Search
+          </Link>
+          <div className="hidden lg:block"><ThemeToggle /></div>
         </div>
       </div>
     </header>
   );
+}
+
+/** Bottom tab bar for phones/tablets. The second tab follows the featured series (live one first), like a "current tournament" shortcut. */
+export async function MobileTabBar() {
+  const [matches, series] = await Promise.all([getAllMatches(), getSeriesList()]);
+  const live = matches.filter((m) => m.status === 'live');
+  const hot = series.find((s) => live.some((m) => m.seriesId === s.id)) ?? series[0];
+  return <TabBar featured={hot ? { href: `/series/${hot.id}`, label: hot.short.length > 9 ? hot.short.slice(0, 9) : hot.short } : { href: '/series', label: 'Series' }} liveCount={live.length} />;
 }
 
 export async function Ticker() {

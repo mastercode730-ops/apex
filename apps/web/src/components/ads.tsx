@@ -88,7 +88,7 @@ export function AnchorAd() {
   }, [show]);
   if (!show) return null;
   return (
-    <div className="anchor-ad md:hidden" role="complementary" aria-label="Advertisement">
+    <div className="anchor-ad lg:hidden" role="complementary" aria-label="Advertisement">
       <button type="button" aria-label="Close ad" onClick={() => setClosed(true)} className="anchor-ad-close">✕</button>
       <Unit kind="anchor" slot={SLOTS.anchor} />
     </div>
