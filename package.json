@@ -22,5 +22,9 @@
     "@electric-sql/pglite-socket": "^0.2.19",
     "vitest": "^5.1.0",
     "yaml": "^2.9.1"
+  },
+  "dependencies": {
+    "@neon/config": "^1.14.6",
+    "@neon/env": "^2.1.9"
   }
 }

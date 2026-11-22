@@ -51,7 +51,7 @@ cp .env.production.example .env.production
 nano .env.production
 ```
 
-Fill at least: `SITE_DOMAIN`, `NEXT_PUBLIC_SITE_URL` (with `https://`), `POSTGRES_PASSWORD` (long random: `openssl rand -hex 24`), `SPORTMONKS_TOKEN`, and `ADMIN_TOKEN` (`openssl rand -hex 16`) if you want the newsroom admin.
+Fill at least: `SITE_DOMAIN`, `NEXT_PUBLIC_SITE_URL` (with `https://`), `POSTGRES_PASSWORD` (long random: `openssl rand -hex 24`), `SPORTMONKS_TOKEN`, `ADMIN_USERNAME` and `ADMIN_PASSWORD` (your own strong password) if you want the newsroom admin.
 `.env.production` holds secrets: it is git-ignored. Never commit it.
 
 > `NEXT_PUBLIC_*` values (site URL, GA ID, Turnstile site key, store links) are baked into the website at build time. If you change one, rebuild: `docker compose --env-file .env.production up -d --build web`.
@@ -82,7 +82,7 @@ Open the site and check: home, a match page (all tabs), Series > points table, R
 1. **Search Console:** add the property, put the token in `GSC_VERIFICATION`, redeploy, verify, submit `https://YOUR-DOMAIN/sitemap.xml`.
 2. **GA4:** put the measurement ID in `NEXT_PUBLIC_GA_ID`, rebuild web, test in GA Realtime (accept the cookie banner first).
 3. **Contact form:** set Resend + `CONTACT_TO_EMAIL`, send a test message at `/contact`. Messages are also saved in the `contact_messages` table.
-4. **Newsroom:** open `/admin`, enter `ADMIN_TOKEN`, publish your first stories (the site shows no demo news in production).
+4. **Newsroom:** open `/admin`, sign in with `ADMIN_USERNAME` / `ADMIN_PASSWORD`, publish your first stories (the site shows no demo news in production).
 5. **Backups:** add a nightly cron (below) and enable Hostinger snapshots.
 6. **Legal:** have the privacy policy and terms reviewed, and add your real company name and contact details.
 

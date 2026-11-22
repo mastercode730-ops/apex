@@ -110,17 +110,27 @@ export async function getCareer(playerId: string): Promise<CareerLine[]> {
 }
 
 // ---------- articles ----------
+/** News comes from Postgres whenever a database is connected (even while matches are still demo data). Until the first story is published in demo mode, the demo stories are shown so the site is not empty. */
+const newsFromDb = () => db.dbConfigured();
+async function dbArticles(category?: string): Promise<Article[]> {
+  try { return await memo(`articles:${category ?? ''}`, 15_000, () => db.listArticleRows({ category, limit: 200 })); }
+  catch (e) { console.error('[data] articles failed:', (e as Error).message); return []; }
+}
+
 export async function getArticles(opts: { category?: string; seriesId?: string; teamId?: string; limit?: number } = {}): Promise<Article[]> {
-  let list: Article[];
-  if (isDb()) { await connection(); list = await memo(`articles:${opts.category ?? ''}`, 15_000, () => db.listArticleRows({ category: opts.category, limit: 200 })); }
-  else list = opts.category ? demoArticles.filter((a) => a.category === opts.category) : demoArticles;
+  let list: Article[] = [];
+  if (newsFromDb()) { await connection(); list = await dbArticles(opts.category); }
+  if (!list.length && !isDb()) list = opts.category ? demoArticles.filter((a) => a.category === opts.category) : demoArticles;
   if (opts.seriesId) list = list.filter((a) => a.seriesId === opts.seriesId);
   if (opts.teamId) list = list.filter((a) => a.teamIds?.includes(opts.teamId!));
   return opts.limit ? list.slice(0, opts.limit) : list;
 }
 export async function getArticle(slug: string): Promise<Article | undefined> {
-  if (isDb()) { await connection(); return memo(`article:${slug}`, 15_000, () => db.getArticleRow(slug)); }
-  return demoArticles.find((a) => a.slug === slug);
+  if (newsFromDb()) {
+    await connection();
+    try { const row = await memo(`article:${slug}`, 15_000, () => db.getArticleRow(slug)); if (row) return row; } catch (e) { console.error('[data] article failed:', (e as Error).message); }
+  }
+  return isDb() ? undefined : demoArticles.find((a) => a.slug === slug);
 }
 
 // ---------- health ----------

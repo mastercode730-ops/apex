@@ -9,7 +9,7 @@ export function getPool(cfg: PoolConfig = {}): Pool {
   if (!pool) {
     const url = process.env.DATABASE_URL;
     if (!url) throw new Error('DATABASE_URL is not set');
-    pool = new Pool({ connectionString: url, max: Number(process.env.PG_POOL_MAX ?? 10), ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : undefined, ...cfg });
+    pool = new Pool({ connectionString: url, max: Number(process.env.PG_POOL_MAX ?? (process.env.VERCEL ? 3 : 10)), ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : undefined, ...cfg });
     pool.on('error', (e) => console.error('[db] idle client error', e.message));
   }
   return pool;
@@ -127,6 +127,12 @@ export async function deleteArticleRow(id: string) { await q('delete from articl
 
 // ---------- misc ----------
 export async function saveContact(name: string, email: string, message: string) { await q('insert into contact_messages (name, email, message) values ($1,$2,$3)', [name, email, message]); }
+export type ContactRow = { id: number; name: string; email: string; message: string; createdAt: string };
+export async function listContactRows(limit = 100): Promise<ContactRow[]> {
+  const rows = await q('select id, name, email, message, created_at from contact_messages order by created_at desc limit $1', [limit]);
+  return rows.map((r: any) => ({ id: Number(r.id), name: r.name, email: r.email, message: r.message, createdAt: new Date(r.created_at).toISOString() }));
+}
+export async function deleteContactRow(id: number) { await q('delete from contact_messages where id = $1', [id]); }
 export async function setState(key: string, value: unknown) { await q(`insert into sync_state (key, value) values ($1,$2) on conflict (key) do update set value = excluded.value, updated_at = now()`, [key, JSON.stringify(value)]); }
 export async function getState<T = any>(key: string): Promise<{ value: T; updatedAt: Date } | undefined> {
   const r = (await q('select value, updated_at from sync_state where key = $1', [key]))[0]; return r ? { value: r.value as T, updatedAt: r.updated_at } : undefined;
