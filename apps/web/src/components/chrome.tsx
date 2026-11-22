@@ -4,6 +4,7 @@ import { getAllMatches, getSeriesList } from '@/lib/data';
 import { NAV, SITE } from '@/lib/site';
 import { ThemeToggle } from './client';
 import { TabBar } from './tabbar';
+import { Logo } from './Logo';
 import { NavLinks } from './smooth';
 
 export function Header() {
@@ -12,7 +13,7 @@ export function Header() {
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-2 focus:z-50 focus:rounded-lg focus:bg-accent focus:px-3 focus:py-2 focus:text-accentink">Skip to content</a>
       <div className="header-inner relative mx-auto flex max-w-7xl 2xl:max-w-[90rem] items-center gap-3 px-4 sm:gap-4">
         <Link href="/" className="group flex items-center gap-2 font-display text-xl font-extrabold tracking-tight" aria-label="Apex home">
-          <span aria-hidden="true" className="logo-mark grid size-8 place-items-center rounded-lg bg-accent text-accentink transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:rotate-[-6deg]">▲</span> APEX
+          <Logo size={36} className="logo-mark rounded-[10px] transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:rotate-[-6deg]" /> APEX
         </Link>
         <NavLinks items={NAV} />
         <div className="ml-auto flex items-center gap-2">
@@ -82,7 +83,7 @@ export async function Footer() {
         </div>
         <div className="mt-10 flex flex-col gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="font-display text-xl font-extrabold">APEX</p>
+            <p className="flex items-center gap-2.5 font-display text-xl font-extrabold"><Logo size={32} className="rounded-lg" />APEX</p>
             <p className="mt-1 max-w-md text-xs text-muted">{SITE.tagline}.</p>
           </div>
           {(process.env.NEXT_PUBLIC_APP_STORE_URL || process.env.NEXT_PUBLIC_PLAY_STORE_URL) && (

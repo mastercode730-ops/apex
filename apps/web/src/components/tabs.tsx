@@ -35,9 +35,9 @@ export function HScroll({ children, className = '' }: { children: React.ReactNod
   const by = (dir: 1 | -1) => ref.current?.scrollBy({ left: dir * Math.max(280, ref.current.clientWidth * 0.8), behavior: 'smooth' });
   return (
     <div className="hscroll-wrap relative">
-      <button type="button" aria-label="Scroll left" onClick={() => by(-1)} className="hs-btn left-0 -translate-x-1/2">‹</button>
+      <button type="button" aria-label="Scroll left" onClick={() => by(-1)} className="hs-btn left-1">‹</button>
       <div ref={ref} data-lenis-prevent className={`hscroll no-scrollbar ${className}`}>{children}</div>
-      <button type="button" aria-label="Scroll right" onClick={() => by(1)} className="hs-btn right-0 translate-x-1/2">›</button>
+      <button type="button" aria-label="Scroll right" onClick={() => by(1)} className="hs-btn right-1">›</button>
     </div>
   );
 }

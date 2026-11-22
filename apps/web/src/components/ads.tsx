@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { Logo } from './Logo';
 
 /**
  * Advertising (Google AdSense). Fully driven by env vars, so it ships "off" and costs nothing until configured:
@@ -110,7 +111,7 @@ export function AppBanner({ ios, android }: { ios?: string; android?: string }) 
   return (
     <div className="flex items-center gap-3 border-b border-line bg-surface px-4 py-2 md:hidden">
       <button type="button" aria-label="Dismiss" onClick={close} className="grid size-8 place-items-center rounded-full text-muted">✕</button>
-      <span aria-hidden="true" className="grid size-9 place-items-center rounded-lg bg-accent text-accentink">▲</span>
+      <Logo size={36} className="rounded-lg" />
       <p className="min-w-0 flex-1 text-sm"><b>Apex app</b><span className="block truncate text-xs text-muted">Faster live scores &amp; alerts</span></p>
       <a href={href} rel="noopener" className="btn btn-primary !min-h-8 !px-4 !py-1 text-sm">Open</a>
     </div>

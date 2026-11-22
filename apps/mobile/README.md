@@ -28,7 +28,7 @@ Expo Go cannot use plain `http://` URLs on iOS for non-local hosts. For a real d
 2. In `app.json` replace `com.yourcompany.apex` (iOS `bundleIdentifier` and Android `package`) with your own reverse-domain id. **It cannot be changed after the first store release.**
 3. Run `eas init` (writes your project id into `app.json`).
 4. In `eas.json` replace `https://YOUR-DOMAIN` with your deployed site URL (profiles `preview` and `production`).
-5. Replace the placeholder artwork in `assets/` (icon 1024x1024, adaptive icon, splash). Regenerate the placeholders any time with `node scripts/make-icons.mjs`.
+5. The Apex logo (an "A" with a cricket-ball crossbar) is already in `assets/` (icon 1024x1024, adaptive icon, splash, favicon); the vector source is `assets/src/logo.svg`. Replace the files only if the brand changes.
 6. Store accounts: Apple Developer Program (about USD 99/year) and Google Play Console (USD 25 one-time).
 
 ## Build and publish

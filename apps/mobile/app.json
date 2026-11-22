@@ -16,7 +16,7 @@
       "package": "com.yourcompany.apex",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#c6ff3d"
+        "backgroundColor": "#bdf000"
       }
     },
     "web": {
