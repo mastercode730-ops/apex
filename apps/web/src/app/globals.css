@@ -154,3 +154,20 @@ img { max-width: 100%; height: auto; }
 .more-link:active { transform: scale(.97); }
 .more-link[aria-current="page"] { background: var(--accent); color: var(--accent-ink); }
 .search-pill { display: inline-flex; align-items: center; gap: .5rem; height: 2.5rem; padding: 0 1.1rem; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: .9rem; font-weight: 600; color: var(--muted); }
+
+/* ---------- content-first home (strip, tabs, scroller) ---------- */
+.utab { position: relative; display: inline-flex; align-items: center; gap: .4rem; padding: .55rem .25rem; margin-right: 1rem; font-weight: 600; color: var(--muted); white-space: nowrap; transition: color .2s; }
+.utab:hover { color: var(--text); }
+.utab-on { color: var(--text); }
+.utab-on::after { content: ""; position: absolute; inset: auto 0 0 0; height: 3px; border-radius: 3px; background: var(--accent); }
+.hscroll { display: flex; gap: 1rem; overflow-x: auto; scroll-snap-type: x proximity; padding: .25rem .25rem 1rem; margin: 0 -.25rem; scroll-padding: 0 .25rem; overscroll-behavior-x: contain; }
+.hscroll > * { scroll-snap-align: start; flex: none; }
+.strip-card { width: min(84vw, 23.5rem); padding: 1rem 1.1rem; }
+.hs-btn { position: absolute; top: 40%; z-index: 5; display: none; width: 2.5rem; height: 2.5rem; place-items: center; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-lg); font-size: 1.4rem; line-height: 1; color: var(--text); opacity: 0; transition: opacity .25s, transform .25s var(--ease); }
+@media (hover: hover) and (min-width: 768px) { .hs-btn { display: grid; } .hscroll-wrap:hover .hs-btn { opacity: 1; } .hs-btn:hover { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); } }
+.news-cover { position: relative; display: flex; align-items: flex-end; overflow: hidden; border-radius: 1.1rem; color: #fff; }
+.news-cover::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 25%, rgb(0 0 0 / .78)); }
+.news-cover > * { position: relative; z-index: 1; }
+.series-cover { display: grid; place-items: center; aspect-ratio: 16 / 10; border-radius: 1.1rem; color: #fff; text-align: center; overflow: hidden; position: relative; }
+.series-cover::after { content: ""; position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 0%, rgb(255 255 255 / .22), transparent 55%); }
+.series-cover > * { position: relative; z-index: 1; }

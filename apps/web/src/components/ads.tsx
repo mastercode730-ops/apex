@@ -65,9 +65,9 @@ function Unit({ kind, slot }: { kind: AdKind | 'anchor'; slot?: string }) {
 }
 
 /** One ad placement. `className` positions the wrapper (e.g. `lg:col-span-2`, `my-8`). */
-export function AdSlot({ kind, className = '' }: { kind: AdKind; className?: string }) {
+export function AdSlot({ kind, className = '', skip }: { kind: AdKind; className?: string; skip?: string[] }) {
   const path = usePathname();
-  if (!enabled(kind) || NO_ADS.test(path)) return null;
+  if (!enabled(kind) || NO_ADS.test(path) || skip?.includes(path)) return null;
   return (
     <aside aria-label="Advertisement" className={`ad-wrap ${kind === 'rect' ? 'mx-auto w-full max-w-[336px] sm:max-w-none' : ''} ${className}`}>
       <p className="ad-label">Advertisement</p>

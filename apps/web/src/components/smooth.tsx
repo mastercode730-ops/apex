@@ -77,3 +77,9 @@ export function NavLinks({ items }: { items: { href: string; label: string }[] }
     </nav>
   );
 }
+
+/** Renders its (server-rendered) children everywhere except on the listed exact paths. */
+export function HideOn({ paths, children }: { paths: string[]; children: React.ReactNode }) {
+  const path = usePathname();
+  return paths.includes(path) ? null : <>{children}</>;
+}

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { teamById } from '@apex/core';
+import { teamById, teams, players } from '@apex/core';
 import { getAllMatches, getSeriesList } from '@/lib/data';
 import { NAV, SITE } from '@/lib/site';
 import { ThemeToggle } from './client';
@@ -17,7 +17,7 @@ export function Header() {
         <NavLinks items={NAV} />
         <div className="ml-auto flex items-center gap-2">
           <form action="/search" role="search" className="hidden lg:block">
-            <input name="q" type="search" placeholder="Search teams, players, series" aria-label="Search" className="w-40 rounded-full border border-line bg-surface px-4 py-2 text-sm outline-none transition focus:w-52 focus:border-accent xl:w-56 xl:focus:w-72" />
+            <input name="q" type="search" placeholder="Search teams, players, series" aria-label="Search" className="w-32 rounded-full border border-line bg-surface px-4 py-2 text-sm outline-none transition focus:border-accent xl:w-56 xl:focus:w-72" />
           </form>
           <Link href="/search" aria-label="Search" className="search-pill lg:hidden">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" className="size-[1.1rem]"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4 4" /></svg>
@@ -60,32 +60,40 @@ export async function Ticker() {
   );
 }
 
-export function Footer() {
-  const cols = [
-    { h: 'Explore', l: [['Live scores', '/cricket-live-score'], ['Fixtures', '/schedule'], ['Series', '/series'], ['Teams', '/team'], ['Stats', '/stats'], ['Rankings', '/rankings/men/team'], ['News', '/news']] },
+export async function Footer() {
+  const [series] = await Promise.all([getSeriesList()]);
+  const cols: { h: string; l: [string, string][] }[] = [
+    { h: 'Explore', l: [['Live scores', '/cricket-live-score'], ['Fixtures', '/schedule'], ['Series', '/series'], ['Stats Corner', '/stats'], ['Rankings', '/rankings/men/team'], ['News', '/news']] },
+    { h: 'Tournaments', l: series.slice(0, 6).map((s) => [s.name, `/series/${s.id}`] as [string, string]) },
+    { h: 'Teams', l: teams.slice(0, 7).map((t) => [t.name, `/team/${t.id}`] as [string, string]) },
+    { h: 'Players', l: players.slice(0, 6).map((p) => [p.name, `/player/${p.id}`] as [string, string]) },
     { h: 'Company', l: [['Contact', '/contact'], ['Privacy Policy', '/privacy-policy'], ['Terms & Conditions', '/terms-and-conditions'], ['Community Guidelines', '/community-guidelines'], ['Editorial Policy', '/editorial-policy'], ['Sitemap', '/sitemap.xml']] },
   ];
   return (
-    <footer className="mt-20 border-t border-line bg-surface/50">
-      <div className="mx-auto grid max-w-7xl gap-10 2xl:max-w-[90rem] px-4 py-12 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr]">
-        <div className="sm:col-span-2 lg:col-span-1">
-          <p className="font-display text-2xl font-extrabold">APEX</p>
-          <p className="mt-3 max-w-sm text-sm text-muted">{SITE.tagline}.</p>
+    <footer className="mt-16 border-t border-line bg-surface/60">
+      <div className="mx-auto max-w-7xl px-4 py-10 2xl:max-w-[90rem]">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-3 lg:grid-cols-5">
+          {cols.map((c) => (
+            <nav key={c.h} aria-label={c.h}>
+              <h2 className="mb-3 text-xs font-bold uppercase tracking-[.16em] text-muted">{c.h}</h2>
+              <ul className="grid gap-2 text-sm">{c.l.map(([n, h]) => <li key={h}><Link href={h} className="transition-colors hover:text-accent">{n}</Link></li>)}</ul>
+            </nav>
+          ))}
+        </div>
+        <div className="mt-10 flex flex-col gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-display text-xl font-extrabold">APEX</p>
+            <p className="mt-1 max-w-md text-xs text-muted">{SITE.tagline}.</p>
+          </div>
           {(process.env.NEXT_PUBLIC_APP_STORE_URL || process.env.NEXT_PUBLIC_PLAY_STORE_URL) && (
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2">
               {process.env.NEXT_PUBLIC_APP_STORE_URL && <a href={process.env.NEXT_PUBLIC_APP_STORE_URL} className="chip" rel="noopener">Download on the App Store</a>}
               {process.env.NEXT_PUBLIC_PLAY_STORE_URL && <a href={process.env.NEXT_PUBLIC_PLAY_STORE_URL} className="chip" rel="noopener">Get it on Google Play</a>}
             </div>
           )}
         </div>
-        {cols.map((c) => (
-          <nav key={c.h} aria-label={c.h}>
-            <h2 className="mb-3 text-sm font-bold uppercase tracking-wider text-muted">{c.h}</h2>
-            <ul className="grid gap-2 text-sm">{c.l.map(([n, h]) => <li key={h}><Link href={h} className="hover:text-accent hover:underline">{n}</Link></li>)}</ul>
-          </nav>
-        ))}
       </div>
-      <p className="border-t border-line py-5 text-center text-xs text-muted">© {new Date().getFullYear()} Apex. All rights reserved.</p>
+      <p className="border-t border-line py-4 text-center text-xs text-muted">© {new Date().getFullYear()} Apex. All rights reserved.</p>
     </footer>
   );
 }

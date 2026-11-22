@@ -4,7 +4,7 @@ import './globals.css';
 import { Header, Footer, MobileTabBar, Ticker } from '@/components/chrome';
 import { Consent } from '@/components/client';
 import { AdSlot, AnchorAd, AppBanner } from '@/components/ads';
-import { BackToTop, ScrollProgress, SmoothScroll } from '@/components/smooth';
+import { BackToTop, HideOn, ScrollProgress, SmoothScroll } from '@/components/smooth';
 import { JsonLd } from '@/components/ui';
 import { SITE } from '@/lib/site';
 
@@ -36,8 +36,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SmoothScroll />
         <ScrollProgress />
         <Header />
-        <Ticker />
-        <AdSlot kind="banner" className="mx-auto max-w-7xl px-4 pt-4 2xl:max-w-[90rem]" />
+        <HideOn paths={['/']}><Ticker /></HideOn>
+        <AdSlot kind="banner" skip={['/']} className="mx-auto max-w-7xl px-4 pt-4 2xl:max-w-[90rem]" />
         <main id="main" className="mx-auto min-h-[70vh] max-w-7xl px-4 py-6 sm:py-8 2xl:max-w-[90rem]">{children}</main>
         <Footer />
         <MobileTabBar />
