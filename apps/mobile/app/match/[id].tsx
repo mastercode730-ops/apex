@@ -5,11 +5,13 @@ import { useApi } from '../../src/useApi';
 import { Chip, FadeIn, LiveDot, Screen, ScoreText, TeamBadge, st } from '../../src/ui';
 import { playerName, teamLabel, timeLabel, type MatchView, type Refs } from '../../src/api';
 import { c, r } from '../../src/theme';
+import { useTheme } from '../../src/ThemeProvider';
 
 const TABS = ['Live', 'Scorecard', 'Commentary', 'Info'] as const;
 type Tab = (typeof TABS)[number];
 
 export default function MatchScreen() {
+  useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [ms, setMs] = useState(0);
   const { data: m, refs, loading, error, refreshing, refresh } = useApi<MatchView>(`/matches/${id}`, ms);

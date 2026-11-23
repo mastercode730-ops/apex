@@ -8,11 +8,12 @@
     },
     "preview": {
       "distribution": "internal",
-      "env": { "EXPO_PUBLIC_API_URL": "https://YOUR-DOMAIN" }
+      "android": { "buildType": "apk" },
+      "env": { "EXPO_PUBLIC_API_URL": "https://apex-phi-tan.vercel.app" }
     },
     "production": {
       "autoIncrement": true,
-      "env": { "EXPO_PUBLIC_API_URL": "https://YOUR-DOMAIN" }
+      "env": { "EXPO_PUBLIC_API_URL": "https://apex-phi-tan.vercel.app" }
     }
   },
   "submit": { "production": {} }

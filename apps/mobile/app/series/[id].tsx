@@ -4,8 +4,10 @@ import { useApi } from '../../src/useApi';
 import { MatchCard, Screen, Section } from '../../src/ui';
 import type { MatchView, Series } from '../../src/api';
 import { c } from '../../src/theme';
+import { useTheme } from '../../src/ThemeProvider';
 
 export default function SeriesScreen() {
+  useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { data, refs, loading, error, refreshing, refresh } = useApi<{ series: Series; matches: MatchView[] }>(`/series/${id}`, 30_000);
   const ms = [...(data?.matches ?? [])].sort((a, b) => +new Date(b.startTime) - +new Date(a.startTime));

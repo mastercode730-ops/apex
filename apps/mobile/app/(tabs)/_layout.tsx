@@ -1,31 +1,33 @@
-import { Image, Text, View, type ColorValue } from 'react-native';
+import { View, type ColorValue } from 'react-native';
 import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { c } from '../../src/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AppHeader } from '../../src/kit';
+import { Icon, type IconName } from '../../src/icons';
+import { useTheme } from '../../src/ThemeProvider';
+import { c, tint } from '../../src/theme';
 
-const icon = (name: keyof typeof Ionicons.glyphMap) => ({ color, size }: { color: ColorValue; size: number }) => <Ionicons name={name} size={size} color={color as string} />;
-
-function Brand() {
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-      <Image source={require('../../assets/favicon.png')} style={{ width: 30, height: 30, borderRadius: 8 }} />
-      <Text style={{ color: c.text, fontWeight: '800', fontSize: 18, letterSpacing: 1 }}>APEX</Text>
-    </View>
-  );
-}
+/** Bottom-bar icon (drawn vector) with a soft pill behind it when selected. */
+const tab = (name: IconName) => ({ color, focused }: { color: ColorValue; focused: boolean }) => (
+  <View style={{ width: 58, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 16, backgroundColor: focused ? tint(c.accent, 0.16) : 'transparent' }}>
+    <Icon name={name} color={color as string} active={focused} size={24} />
+  </View>
+);
 
 export default function TabsLayout() {
+  useTheme(); // re-render (and re-colour the bar) when the theme changes
+  const { bottom } = useSafeAreaInsets();
   return (
     <Tabs screenOptions={{
-      headerStyle: { backgroundColor: c.bg }, headerTintColor: c.text, headerTitleStyle: { fontWeight: '800' }, headerShadowVisible: false,
-      tabBarStyle: { backgroundColor: c.surface, borderTopColor: c.line }, tabBarActiveTintColor: c.accent, tabBarInactiveTintColor: c.muted,
-      tabBarLabelStyle: { fontWeight: '700', fontSize: 11 }, sceneStyle: { backgroundColor: c.bg },
+      header: () => <AppHeader />,
+      tabBarStyle: { backgroundColor: c.surface, borderTopColor: c.line, height: 68 + bottom, paddingTop: 6, paddingBottom: Math.max(bottom, 8) },
+      tabBarActiveTintColor: c.accent, tabBarInactiveTintColor: c.muted,
+      tabBarLabelStyle: { fontWeight: '700', fontSize: 11.5 }, sceneStyle: { backgroundColor: c.bg },
     }}>
-      <Tabs.Screen name="index" options={{ title: 'Live', headerTitle: () => <Brand />, tabBarIcon: icon('radio-outline') }} />
-      <Tabs.Screen name="fixtures" options={{ title: 'Fixtures', tabBarIcon: icon('calendar-outline') }} />
-      <Tabs.Screen name="series" options={{ title: 'Series', tabBarIcon: icon('trophy-outline') }} />
-      <Tabs.Screen name="rankings" options={{ title: 'Rankings', tabBarIcon: icon('stats-chart-outline') }} />
-      <Tabs.Screen name="news" options={{ title: 'News', tabBarIcon: icon('newspaper-outline') }} />
+      <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: tab('home') }} />
+      <Tabs.Screen name="series" options={{ title: 'Series', tabBarIcon: tab('trophy') }} />
+      <Tabs.Screen name="matches" options={{ title: 'Matches', tabBarIcon: tab('ball') }} />
+      <Tabs.Screen name="news" options={{ title: 'News', tabBarIcon: tab('news') }} />
+      <Tabs.Screen name="more" options={{ title: 'More', tabBarIcon: tab('grid') }} />
     </Tabs>
   );
 }

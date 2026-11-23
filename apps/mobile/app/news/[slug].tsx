@@ -4,8 +4,10 @@ import { useApi } from '../../src/useApi';
 import { FadeIn, Screen } from '../../src/ui';
 import { ago, type Article } from '../../src/api';
 import { c } from '../../src/theme';
+import { useTheme } from '../../src/ThemeProvider';
 
 export default function ArticleScreen() {
+  useTheme();
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const { data, loading, error } = useApi<Article>(`/news/${slug}`);
   return (

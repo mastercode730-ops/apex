@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { ActivityIndicator, Animated, Easing, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, type ViewStyle } from 'react-native';
-import { c, r } from './theme';
+import { c, onTheme, r } from './theme';
 import { teamLabel, timeLabel, type MatchView, type Refs } from './api';
 import { router } from 'expo-router';
 
@@ -69,9 +69,9 @@ export function Chip({ label, active, onPress }: { label: string; active?: boole
   return <Pressable onPress={onPress} accessibilityRole="button" accessibilityState={{ selected: !!active }} style={[st.chip, active && { backgroundColor: c.accent, borderColor: c.accent }]}><Text style={[st.chipTxt, active && { color: c.accentInk }]}>{label}</Text></Pressable>;
 }
 
-export function Screen({ children, refreshing, onRefresh, loading, error, empty }: { children?: ReactNode; refreshing?: boolean; onRefresh?: () => void; loading?: boolean; error?: string; empty?: string }) {
+export function Screen({ children, refreshing, onRefresh, loading, error, empty, flush }: { children?: ReactNode; refreshing?: boolean; onRefresh?: () => void; loading?: boolean; error?: string; empty?: string; flush?: boolean }) {
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
+    <ScrollView style={{ flex: 1, backgroundColor: c.bg }} contentContainerStyle={flush ? { paddingTop: 4, paddingBottom: 48 } : { padding: 16, paddingBottom: 48 }}
       refreshControl={onRefresh ? <RefreshControl refreshing={!!refreshing} onRefresh={onRefresh} tintColor={c.accent} colors={[c.accent]} /> : undefined}>
       {loading && <ActivityIndicator color={c.accent} style={{ marginTop: 48 }} />}
       {!loading && error && <View style={st.notice}><Text style={st.noticeTitle}>Couldn&apos;t load data</Text><Text style={st.muted}>{error}</Text><Text style={[st.muted, { marginTop: 6 }]}>Pull down to retry.</Text></View>}
@@ -81,7 +81,7 @@ export function Screen({ children, refreshing, onRefresh, loading, error, empty 
   );
 }
 
-export const st = StyleSheet.create({
+const makeST = () => StyleSheet.create({
   card: { backgroundColor: c.surface, borderWidth: 1, borderColor: c.line, borderRadius: r.lg, padding: 14, gap: 10 },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
@@ -99,3 +99,5 @@ export const st = StyleSheet.create({
   notice: { backgroundColor: c.surface, borderRadius: r.lg, borderWidth: 1, borderColor: c.line, padding: 20, alignItems: 'center', gap: 4, marginTop: 20 },
   noticeTitle: { color: c.text, fontWeight: '800', fontSize: 16 },
 });
+export let st = makeST();
+onTheme(() => { st = makeST(); });

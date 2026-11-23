@@ -6,14 +6,14 @@
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "backgroundColor": "#080b12",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.apex"
+      "bundleIdentifier": "com.apexcricket.app"
     },
     "android": {
-      "package": "com.yourcompany.apex",
+      "package": "com.apexcricket.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#bdf000"
@@ -41,10 +41,15 @@
       "typedRoutes": false
     },
     "extra": {
-      "router": {},
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
       "eas": {
-        "projectId": ""
+        "projectId": "e68f94ab-3965-42b4-be13-316b09d8afbd"
       }
-    }
+    },
+    "owner": "mastercode730"
   }
 }

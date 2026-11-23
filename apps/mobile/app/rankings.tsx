@@ -1,13 +1,15 @@
 import { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
-import { useApi } from '../../src/useApi';
-import { Chip, FadeIn, Screen, TeamBadge, st } from '../../src/ui';
-import type { RankingEntry, Refs, Team } from '../../src/api';
-import { c } from '../../src/theme';
+import { useApi } from '../src/useApi';
+import { Chip, FadeIn, Screen, TeamBadge, st } from '../src/ui';
+import type { RankingEntry, Refs, Team } from '../src/api';
+import { c } from '../src/theme';
+import { useTheme } from '../src/ThemeProvider';
 
 const FORMATS = [['TEST', 'Test'], ['ODI', 'ODI'], ['T20', 'T20I']] as const;
 
 export default function Rankings() {
+  useTheme();
   const [gender, setGender] = useState<'men' | 'women'>('men');
   const [format, setFormat] = useState<'TEST' | 'ODI' | 'T20'>('T20');
   const teams = useApi<Team[]>('/teams');
